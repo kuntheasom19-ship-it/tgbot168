@@ -287,7 +287,27 @@ def fetch_cloudflare_menus():
         with urllib.request.urlopen(req, timeout=5) as response:
             if response.status == 200:
                 data = json.loads(response.read().decode('utf-8'))
-                return data.get('main_menus', {}), data.get('counts', {})
+                raw_main_menus = data.get('main_menus', {})
+                raw_counts = data.get('counts', {})
+                
+                parsed_main_menus = {}
+                parsed_counts = dict(raw_counts) if isinstance(raw_counts, dict) else {}
+                
+                for main_name, subs in raw_main_menus.items():
+                    sub_list = []
+                    if isinstance(subs, list):
+                        for item in subs:
+                            if isinstance(item, dict):
+                                sub_name = item.get('name', '')
+                                sub_count = item.get('count', 0)
+                                if sub_name:
+                                    sub_list.append(sub_name)
+                                    parsed_counts[sub_name] = sub_count
+                            elif isinstance(item, str):
+                                sub_list.append(item)
+                    parsed_main_menus[main_name] = sub_list
+                    
+                return parsed_main_menus, parsed_counts
     except Exception as e:
         logging.error(f"Error fetching Cloudflare menus: {e}")
     return {}, {}
