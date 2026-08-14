@@ -90,7 +90,7 @@ def load_config():
     return default_config
 
 config_data = load_config()
-TOKEN = os.environ.get("TOKEN", config_data.get("TOKEN", ""))
+TOKEN = os.environ.get("BOT_TOKEN", os.environ.get("TOKEN", config_data.get("TOKEN", "")))
 ADMIN_IDS = config_data.get("ADMIN_IDS", [8558847170]) 
 MENUS = config_data.get("MENUS", ["F88$", "F88$_CH", "F88_CH_KH", "F88_KH"])
 MAIN_MENUS = config_data.get("MAIN_MENUS", {})
