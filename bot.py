@@ -602,7 +602,7 @@ async def handle_menu_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
             except Exception:
                 pass
 
-        response = f"<b>✅ គណនី {actual_menu_name} របស់អ្នក៖</b>\n\n<code>{acc_user}\n{acc_pass}</code>"
+        response = f"<b>✅ គណនី {actual_menu_name} របស់អ្នក៖</b>\n\n{acc_user}\n{acc_pass}"
         reply_markup = get_user_reply_keyboard(user_id, context)
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
@@ -646,7 +646,7 @@ async def handle_menu_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 except Exception:
                     pass
 
-            response = f"<b>✅ គណនី {actual_menu_name} របស់អ្នក៖</b>\n\n<code>{acc_user}\n{acc_pass}</code>"
+            response = f"<b>✅ គណនី {actual_menu_name} របស់អ្នក៖</b>\n\n{acc_user}\n{acc_pass}"
             reply_markup = get_user_reply_keyboard(user_id, context)
             await context.bot.send_message(
                 chat_id=update.effective_chat.id,
