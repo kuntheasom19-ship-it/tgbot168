@@ -1,0 +1,13 @@
+name = "tgbot-web-app"
+main = "worker.js"
+compatibility_date = "2026-08-05"
+
+assets = { directory = "./public" }
+
+[vars]
+ENVIRONMENT = "production"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "tgbot-db"
+database_id = "83c5df11-7386-4af6-b8c9-3d8aea9f9815"

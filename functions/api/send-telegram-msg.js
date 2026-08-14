@@ -1,0 +1,61 @@
+const DEFAULT_TOKEN = "";
+
+export async function onRequestPost(context) {
+    const { request, env } = context;
+    const db = env.DB;
+
+    let token = env.BOT_TOKEN || DEFAULT_TOKEN;
+    if (db) {
+        try {
+            const tokenRow = await db.prepare(`SELECT value FROM settings WHERE key = 'token'`).first();
+            if (tokenRow && tokenRow.value) token = tokenRow.value;
+        } catch (e) {}
+    }
+
+    try {
+        const body = await request.json();
+        const { user_id, menu_name, username, password } = body;
+
+        if (!user_id) {
+            return new Response(JSON.stringify({ success: false, error: 'user_id is required' }), {
+                headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+            });
+        }
+
+        if (!token) {
+            return new Response(JSON.stringify({ success: false, error: 'Telegram Bot Token is not configured' }), {
+                headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+            });
+        }
+
+        // Send Message 1: Notice matching Telegram bot claim response
+        await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: user_id,
+                text: `នេះជាគណនី ${menu_name} របស់អ្នក៖`
+            })
+        });
+
+        // Send Message 2: Monospace Username & Password for 1-click copy matching Telegram bot
+        await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: user_id,
+                text: `<code>${username}\n${password}</code>`,
+                parse_mode: 'HTML'
+            })
+        });
+
+        // NOTE: NO HISTORY INSERTION HERE! History is recorded strictly ONCE during /api/claim.
+        return new Response(JSON.stringify({ success: true }), {
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+        });
+    } catch (e) {
+        return new Response(JSON.stringify({ success: false, error: e.message }), {
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+        });
+    }
+}

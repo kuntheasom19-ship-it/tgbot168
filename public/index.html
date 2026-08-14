@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>អាខោនតែស</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Kantumruy+Pro:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="dark-theme">
+
+    <!-- Top Navigation Bar -->
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="nav-top-row">
+                <div class="brand">
+                    <div class="brand-logo">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </div>
+                    <div class="brand-text">
+                        <span class="title">អាខោនតែស</span>
+                        <span class="subtitle">ប្រព័ន្ធគ្រប់គ្រង និងទាញយកគណនី</span>
+                    </div>
+                </div>
+
+                <div class="nav-actions" style="display: flex; align-items: center; gap: 10px;">
+                    <div class="server-status-pill" id="global-status-pill">
+                        <span class="status-dot green"></span>
+                        <span id="global-status-text">Server Online</span>
+                    </div>
+                    <button type="button" id="btn-admin-auth" class="btn btn-secondary btn-sm" style="padding: 7px 12px; font-size: 16px; background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-color); color: var(--text-main); border-radius: var(--radius-sm);" title="Admin Login">
+                        🔑
+                    </button>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="nav-tabs">
+                <button class="nav-tab active" data-tab="user-portal">
+                    <i class="fa-solid fa-store"></i> <span>User Portal</span>
+                </button>
+                <button class="nav-tab admin-only-tab" data-tab="dashboard" style="display: none;">
+                    <i class="fa-solid fa-chart-pie"></i> <span>Dashboard</span>
+                </button>
+                <button class="nav-tab admin-only-tab" data-tab="accounts" style="display: none;">
+                    <i class="fa-solid fa-users-gear"></i> <span>Accounts</span>
+                </button>
+                <button class="nav-tab admin-only-tab" data-tab="excel-tools" style="display: none;">
+                    <i class="fa-solid fa-file-excel"></i> <span>Excel Tools</span>
+                </button>
+                <button class="nav-tab admin-only-tab" data-tab="menus" style="display: none;">
+                    <i class="fa-solid fa-list-check"></i> <span>Menus</span>
+                </button>
+                <button class="nav-tab admin-only-tab" data-tab="history" style="display: none;">
+                    <i class="fa-solid fa-clock-rotate-left"></i> <span>History</span>
+                </button>
+                <button class="nav-tab admin-only-tab" data-tab="summarize" style="display: none;">
+                    <i class="fa-solid fa-chart-column"></i> <span>Summarize</span>
+                </button>
+                <button class="nav-tab admin-only-tab" data-tab="bot-control" style="display: none;">
+                    <i class="fa-solid fa-robot"></i> <span>Bot Controller</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+
+        <!-- 1. USER PORTAL TAB -->
+        <section id="tab-user-portal" class="tab-pane active">
+
+            <!-- Main Category Selection Dropdown Bar -->
+            <div class="category-dropdown-bar" id="portal-category-container" style="display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 24px; padding: 14px 20px; background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-color); border-radius: var(--radius-lg); flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <label for="portal-category-select" style="font-weight: 700; font-size: 15px; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-layer-group" style="color: var(--primary);"></i> ជ្រើសរើស៖
+                    </label>
+                    <select id="portal-category-select" onchange="selectPortalCategory(this.value)" style="padding: 10px 16px; background: #1e293b; border: 1px solid var(--border-color); border-radius: 8px; color: #f8fafc; font-size: 15px; font-weight: 600; outline: none; cursor: pointer; min-width: 240px;">
+                        <!-- Dynamically populated by JS -->
+                    </select>
+                </div>
+            </div>
+
+            <!-- Categories Accordion / Grid -->
+            <div id="user-portal-categories" class="categories-container">
+                <!-- Dynamically populated by JS -->
+                <div class="loading-spinner"><i class="fa-solid fa-spinner fa-spin"></i> កំពុងផ្ទុកទិន្នន័យ...</div>
+            </div>
+        </section>
+
+
+        <!-- 2. DASHBOARD TAB -->
+        <section id="tab-dashboard" class="tab-pane">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-chart-line"></i> Dashboard Overview (សង្ខេបព័ត៌មានប្រព័ន្ធ)</h2>
+                <button class="btn btn-secondary btn-sm" id="btn-refresh-dashboard"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+            </div>
+
+            <!-- Metric Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon cyan"><i class="fa-solid fa-vault"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">គណនីក្នុងស្តុក (Available Stock)</span>
+                        <span class="stat-value" id="stat-total-accounts">0</span>
+                    </div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-icon green"><i class="fa-solid fa-circle-check"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">ទាញយក (ថ្ងៃនេះ / សរុប)</span>
+                        <span class="stat-value" id="stat-total-claimed">0 / 0</span>
+                    </div>
+                </div>
+                <div class="stat-card purple">
+                    <div class="stat-icon purple"><i class="fa-solid fa-folder-tree"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Main Categories</span>
+                        <span class="stat-value" id="stat-main-menus">0</span>
+                    </div>
+                </div>
+                <div class="stat-card orange">
+                    <div class="stat-icon orange"><i class="fa-solid fa-tags"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Sub-Menus សរុប</span>
+                        <span class="stat-value" id="stat-sub-menus">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stock Breakdown Chart & Quick Actions -->
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <h3><i class="fa-solid fa-boxes-stacked"></i> ស្តុកតាមប្រភេទ (Inventory Breakdown)</h3>
+                    <div id="dashboard-stock-list" class="stock-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                <div class="dashboard-card">
+                    <h3><i class="fa-solid fa-sliders"></i> Quick Status & Server Health</h3>
+                    <div class="system-status-box">
+                        <div class="status-row">
+                            <span>Web Server API:</span>
+                            <span class="badge green-badge"><i class="fa-solid fa-circle"></i> Online</span>
+                        </div>
+                        <div class="status-row">
+                            <span>Telegram Bot Process:</span>
+                            <span class="badge" id="dash-bot-badge"><i class="fa-solid fa-circle"></i> Stopped</span>
+                        </div>
+                        <div class="status-row">
+                            <span>Database File:</span>
+                            <span class="badge blue-badge">bot_data.db (SQLite)</span>
+                        </div>
+                        <div class="status-row">
+                            <span>Phnom Penh Time (UTC+7):</span>
+                            <span class="badge purple-badge" id="dash-clock">00:00:00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 3. ACCOUNTS MANAGEMENT TAB -->
+        <section id="tab-accounts" class="tab-pane">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-users"></i> គ្រប់គ្រងគណនី (Accounts Management)</h2>
+                <div class="header-buttons" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn btn-primary" id="btn-open-add-modal"><i class="fa-solid fa-plus"></i> បន្ថែមគណនី (Add Account)</button>
+                    <button class="btn btn-secondary" id="btn-backup-accounts"><i class="fa-solid fa-download"></i> Backup គណនី</button>
+                    <button class="btn btn-secondary" id="btn-restore-accounts"><i class="fa-solid fa-upload"></i> Restore គណនី</button>
+                    <button class="btn btn-danger" id="btn-delete-all-acc"><i class="fa-solid fa-trash"></i> លុបទាំងអស់ (Delete All)</button>
+                </div>
+                <input type="file" id="restore-acc-file-input" accept=".json,.xlsx" style="display: none;">
+            </div>
+
+            <!-- Filter & Search Bar -->
+            <div class="filter-card">
+                <div class="search-input-group">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="acc-search-input" placeholder="ស្វែងរក Username ឬ Menu...">
+                </div>
+                <div class="select-group">
+                    <label>Filter by Menu:</label>
+                    <select id="acc-menu-filter">
+                        <option value="all">-- ទាំងអស់ (All Menus) --</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Accounts Data Table -->
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th># ID</th>
+                            <th>Menu Name</th>
+                            <th>Username (ឈ្មោះអ្នកប្រើ)</th>
+                            <th>Password (ពាក្យសម្ងាត់)</th>
+                            <th class="text-center">សកម្មភាព (Actions)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accounts-table-body">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Controls -->
+            <div class="pagination-bar">
+                <span id="acc-page-info">Showing 0 to 0 of 0 accounts</span>
+                <div class="pagination-buttons">
+                    <button class="btn btn-secondary btn-sm" id="acc-prev-btn" disabled><i class="fa-solid fa-chevron-left"></i> Previous</button>
+                    <span id="acc-current-page" class="page-indicator">1</span>
+                    <button class="btn btn-secondary btn-sm" id="acc-next-btn" disabled>Next <i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 4. EXCEL TOOLS TAB -->
+        <section id="tab-excel-tools" class="tab-pane">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-file-excel"></i> Excel Bulk Import & Export Tools</h2>
+            </div>
+
+            <div class="excel-grid">
+                <!-- Excel Import Card -->
+                <div class="card excel-card">
+                    <div class="card-icon cyan-bg"><i class="fa-solid fa-file-arrow-up"></i></div>
+                    <h3>បញ្ចូលទិន្នន័យតាម Excel (Import Accounts)</h3>
+                    <p>ជ្រើសរើស ឬទម្លាក់ឯកសារ Excel (<code>.xlsx</code>) ដែលមាន Columns: <code>menu_name</code>, <code>username</code>, <code>password</code></p>
+                    
+                    <div class="drop-zone" id="excel-drop-zone">
+                        <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
+                        <span class="drop-text">ចុចទីនេះ ឬទាញឯកសារ Excel មកទម្លាក់ទីនេះ</span>
+                        <input type="file" id="excel-file-input" accept=".xlsx, .xls">
+                    </div>
+                    <div id="excel-file-name" class="file-preview-name"></div>
+                    <button class="btn btn-success btn-block" id="btn-upload-excel" disabled><i class="fa-solid fa-upload"></i> Upload & Import Excel</button>
+                </div>
+
+                <!-- Excel Export & Download Sample Card -->
+                <div class="card excel-card">
+                    <div class="card-icon green-bg"><i class="fa-solid fa-file-arrow-down"></i></div>
+                    <h3>ទាញយកឯកសារ Excel (Export & Template)</h3>
+                    <p>ទាញយកឯកសារ Excel ដែលរួមមាន 3 Sheets គឺ <strong>Data_Entry</strong>, <strong>menu_name</strong>, និង <strong>All Data</strong></p>
+                    
+                    <div class="export-actions">
+                        <button type="button" id="btn-export-excel-template" class="btn btn-primary btn-block"><i class="fa-solid fa-download"></i> ទាញយកគំរូ និងទិន្នន័យ Excel (Download .xlsx)</button>
+                        <button type="button" id="btn-export-excel-history" class="btn btn-secondary btn-block"><i class="fa-solid fa-file-csv"></i> ទាញយកប្រវត្តិទាញយក (Export History .xlsx)</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 5. MENUS MANAGEMENT TAB -->
+        <section id="tab-menus" class="tab-pane">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-folder-tree"></i> គ្រប់គ្រង Menu និង Category (Menus Management)</h2>
+                <div class="header-buttons">
+                    <button class="btn btn-primary" id="btn-add-main-menu-modal"><i class="fa-solid fa-folder-plus"></i> + Add Main Menu</button>
+                    <button class="btn btn-secondary" id="btn-add-sub-menu-modal"><i class="fa-solid fa-plus"></i> + Add Sub Menu</button>
+                </div>
+            </div>
+
+            <!-- Visual Menu Hierarchy Builder -->
+            <div id="menu-management-container" class="menu-builder-grid">
+                <!-- JS will populate categories with sub-menus and edit/delete controls -->
+            </div>
+        </section>
+
+
+        <!-- 6. HISTORY TAB -->
+        <section id="tab-history" class="tab-pane">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-clock-rotate-left"></i> ប្រវត្តិទាញយកគណនី (Claim History)</h2>
+            </div>
+
+            <!-- Sub Navigation Bar inside History -->
+            <div class="history-subnav-bar" style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; flex-wrap: wrap; align-items: center;">
+                <button type="button" class="btn btn-secondary btn-sm history-sub-btn active" data-subtab="logs" id="btn-subtab-history-logs">
+                    <i class="fa-solid fa-list-ul"></i> History Logs (ប្រវត្តិទាញយក)
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm history-sub-btn" data-subtab="delete" id="btn-subtab-history-delete">
+                    <i class="fa-solid fa-trash-can"></i> Delete (លុបប្រវត្តិ)
+                </button>
+                <button type="button" id="btn-export-history-header" class="btn btn-success btn-sm"><i class="fa-solid fa-file-excel"></i> Export Excel (.xlsx)</button>
+            </div>
+
+            <!-- Sub Tab Content 1: History Logs -->
+            <div id="subtab-history-logs-content">
+                <div class="section-header" style="margin-bottom: 16px;">
+                    <h3 style="font-size: 18px; color: var(--text-main); font-weight: 600;"><i class="fa-solid fa-table-list"></i> បញ្ជីប្រវត្តិទាញយក</h3>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th># Log ID</th>
+                                <th>អ្នកប្រើប្រាស់ (User / TG)</th>
+                                <th>Menu Name</th>
+                                <th>Account Username</th>
+                                <th>Account Password</th>
+                                <th>ស្តុកនៅសល់ (Stock Left)</th>
+                                <th>កាលបរិច្ឆេទ (Timestamp UTC+7)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination-bar">
+                    <span id="hist-page-info">Showing 0 to 0 of 0 records</span>
+                    <div class="pagination-buttons">
+                        <button class="btn btn-secondary btn-sm" id="hist-prev-btn" disabled><i class="fa-solid fa-chevron-left"></i> Previous</button>
+                        <span id="hist-current-page" class="page-indicator">1</span>
+                        <button class="btn btn-secondary btn-sm" id="hist-next-btn" disabled>Next <i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sub Tab Content 2: Delete Operations -->
+            <div id="subtab-history-delete-content" style="display: none;">
+                <div class="section-header" style="margin-bottom: 16px;">
+                    <h3 style="font-size: 18px; color: #f87171; font-weight: 600;"><i class="fa-solid fa-triangle-exclamation"></i> ផ្ទាំងលុបប្រវត្តិទាញយក (Delete History Operations)</h3>
+                </div>
+
+                <div class="card" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-md); padding: 20px; margin-bottom: 24px;">
+                    <!-- Delete Options Grid -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                        <!-- Option 1: Delete by Date Range -->
+                        <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 16px;">
+                            <h4 style="font-size: 15px; color: var(--text-main); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-calendar-xmark" style="color: #f87171;"></i> ១. លុបប្រវត្តិតាមថ្ងៃ (Delete by Date)
+                            </h4>
+                            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">ជ្រើសរើសចន្លោះកាលបរិច្ឆេទចាប់ពី និង ដល់ ដើម្បីលុបប្រវត្តិទាញយក៖</p>
+                            
+                            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;">
+                                <div>
+                                    <label style="font-size: 12px; color: var(--text-muted); font-weight: 600;"><i class="fa-solid fa-calendar-days"></i> ចាប់ពី៖</label>
+                                    <input type="date" id="hist-delete-date-start" class="date-input" style="width: 100%; padding: 8px 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 13px; margin-top: 4px;">
+                                </div>
+                                <div>
+                                    <label style="font-size: 12px; color: var(--text-muted); font-weight: 600;">ដល់៖</label>
+                                    <input type="date" id="hist-delete-date-end" class="date-input" style="width: 100%; padding: 8px 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 13px; margin-top: 4px;">
+                                </div>
+                            </div>
+
+                            <button type="button" id="btn-delete-range-history" class="btn btn-danger btn-sm" style="width: 100%; padding: 10px;">
+                                <i class="fa-solid fa-calendar-xmark"></i> លុបតាមថ្ងៃ (Delete Range)
+                            </button>
+                        </div>
+
+                        <!-- Option 2: Clear All History -->
+                        <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <h4 style="font-size: 15px; color: #ef4444; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                    <i class="fa-solid fa-dumpster-fire"></i> ២. លុបប្រវត្តិទាំងអស់ (Clear All History)
+                                </h4>
+                                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">លុបប្រវត្តិទាញយកទាំងអស់ចេញពីប្រព័ន្ធទាំងស្រុង (មិនអាចស្តារវិញបានទេ)៖</p>
+                            </div>
+                            
+                            <div style="margin-top: auto;">
+                                <button type="button" id="btn-delete-all-history" class="btn btn-danger btn-sm" style="width: 100%; padding: 10px; background: #dc2626; border-color: #dc2626;">
+                                    <i class="fa-solid fa-trash-can"></i> លុបប្រវត្តិទាំងអស់ (Clear History)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Option 3: Delete History Logs One by One -->
+                    <div style="margin-top: 24px; background: rgba(30, 41, 59, 0.6); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 16px;">
+                        <h4 style="font-size: 15px; color: var(--text-main); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-list-check" style="color: #60a5fa;"></i> ៣. លុបប្រវត្តិម្តងមួយ (Delete History One by One)
+                        </h4>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">ជ្រើសរើស ឬស្វែងរកប្រវត្តិទាញយកនីមួយៗ រួចចុចប៊ូតុង <strong style="color: #ef4444;">«លុប»</strong> ខាងស្តាំជួរ ដើម្បីលុបម្តងមួយអាខោន៖</p>
+
+                        <!-- Search input for single delete -->
+                        <div class="search-input-group" style="margin-bottom: 16px;">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="hist-delete-single-search" placeholder="ស្វែងរកតាមឈ្មោះ User, Telegram Username ឬ Menu Name...">
+                        </div>
+
+                        <!-- Data Table for Delete One by One -->
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th># Log ID</th>
+                                        <th>អ្នកប្រើប្រាស់ (User / TG)</th>
+                                        <th>Menu Name</th>
+                                        <th>Account Username</th>
+                                        <th>Account Password</th>
+                                        <th>កាលបរិច្ឆេទ (Timestamp)</th>
+                                        <th>សកម្មភាព (Action)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="history-delete-single-table-body">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="pagination-bar" style="margin-top: 14px;">
+                            <span id="hist-delete-single-page-info">Showing 0 to 0 of 0 records</span>
+                            <div class="pagination-buttons">
+                                <button class="btn btn-secondary btn-sm" id="hist-delete-single-prev-btn" disabled><i class="fa-solid fa-chevron-left"></i> Previous</button>
+                                <span id="hist-delete-single-current-page" class="page-indicator">1</span>
+                                <button class="btn btn-secondary btn-sm" id="hist-delete-single-next-btn" disabled>Next <i class="fa-solid fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 7. SUMMARIZE TAB -->
+        <section id="tab-summarize" class="tab-pane">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-chart-column"></i> របាយការណ៍សង្ខេបប្រព័ន្ធ (Summarize Reports)</h2>
+            </div>
+
+            <!-- Sub Navigation Bar inside Summarize -->
+            <div class="summarize-subnav-bar" style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; flex-wrap: wrap;">
+                <button type="button" class="btn btn-secondary btn-sm summarize-sub-btn active" data-subtab="claimed" id="btn-subtab-claimed">
+                    <i class="fa-solid fa-square-poll-vertical"></i> Claimed (របាយការណ៍ប្រចាំថ្ងៃ)
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm summarize-sub-btn" data-subtab="user" id="btn-subtab-user">
+                    <i class="fa-solid fa-user-group"></i> User (របាយការណ៍តាម User)
+                </button>
+            </div>
+
+            <!-- Sub Tab Content: Claimed Daily Report -->
+            <div id="subtab-claimed-content">
+                <!-- Summary Metrics Bar -->
+                <div class="stats-grid" style="margin-bottom: 20px;">
+                    <div class="stat-card green">
+                        <div class="stat-icon green"><i class="fa-solid fa-calendar-day"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-label">ទាញយកថ្ងៃនេះ (Today Claimed)</span>
+                            <span class="stat-value" id="sum-today-claimed">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card cyan">
+                        <div class="stat-icon cyan"><i class="fa-solid fa-calendar-minus"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-label">ទាញយកម្សិលមិញ (Yesterday)</span>
+                            <span class="stat-value" id="sum-yesterday-claimed">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card purple">
+                        <div class="stat-icon purple"><i class="fa-solid fa-calendar-days"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-label">ទាញយកខែនេះ (This Month)</span>
+                            <span class="stat-value" id="sum-month-claimed">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-icon orange"><i class="fa-solid fa-trophy"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-label">និយមទាញយកជាងគេថ្ងៃនេះ</span>
+                            <span class="stat-value" id="sum-top-category" style="font-size: 16px;">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Date Range & Quick Filters Bar -->
+                <div class="filter-card">
+                    <div class="search-input-group">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="sum-search-input" placeholder="ស្វែងរកតាមកាលបរិច្ឆេទ (YYYY-MM-DD) ឬ Menu...">
+                    </div>
+                    <div class="date-filter-group">
+                        <div>
+                            <label style="font-size: 13px; color: var(--text-muted); font-weight: 600; white-space: nowrap;"><i class="fa-solid fa-calendar-days"></i> ចាប់ពី៖</label>
+                            <input type="date" id="sum-date-start" class="date-input" style="padding: 8px 12px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 13px;">
+                        </div>
+                        <div>
+                            <label style="font-size: 13px; color: var(--text-muted); font-weight: 600; white-space: nowrap;">ដល់៖</label>
+                            <input type="date" id="sum-date-end" class="date-input" style="padding: 8px 12px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 13px;">
+                        </div>
+                        <div style="display: flex; gap: 8px; width: 100%; flex-wrap: wrap;">
+                            <button type="button" id="btn-sum-quick-today" class="btn btn-secondary btn-sm">ថ្ងៃនេះ</button>
+                            <button type="button" id="btn-sum-quick-yesterday" class="btn btn-secondary btn-sm">ម្សិលមិញ</button>
+                            <button type="button" id="btn-sum-quick-7days" class="btn btn-secondary btn-sm">៧ ថ្ងៃចុងក្រោយ</button>
+                            <button type="button" id="btn-sum-reset" class="btn btn-secondary btn-sm"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+                            <button type="button" id="btn-sum-export-excel" class="btn btn-success btn-sm"><i class="fa-solid fa-file-excel"></i> Export Excel</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Daily Summary Data Table / Cards -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>កាលបរិច្ឆេទ (Date)</th>
+                                <th>ចំនួនទាញយកសរុប (Total Claimed)</th>
+                                <th>ចំនួនអ្នកប្រើប្រាស់ (Unique Users)</th>
+                                <th>សេចក្តីលម្អិតតាម Menu (Category Breakdown)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="summarize-claimed-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Sub Tab Content: User Daily Summary Report -->
+            <div id="subtab-user-content" style="display: none;">
+                <!-- Summary Metrics Bar for Users -->
+                <div class="stats-grid" style="margin-bottom: 20px;">
+                    <div class="stat-card green">
+                        <div class="stat-icon green"><i class="fa-solid fa-users"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-label">អ្នកប្រើប្រាស់ថ្ងៃនេះ (Active Users)</span>
+                            <span class="stat-value" id="sum-user-today-active">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-icon orange"><i class="fa-solid fa-trophy"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-label">អ្នកទាញយកច្រើនជាងគេថ្ងៃនេះ</span>
+                            <span class="stat-value" id="sum-user-top-today" style="font-size: 16px;">-</span>
+                        </div>
+                    </div>
+                    <div class="stat-card cyan">
+                        <div class="stat-icon cyan"><i class="fa-solid fa-calculator"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-label">មធ្យមភាគការទាញយក/ម្នាក់</span>
+                            <span class="stat-value" id="sum-user-avg-today">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Date Range & Quick Filters Bar for Users -->
+                <div class="filter-card">
+                    <div class="search-input-group">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="sum-user-search-input" placeholder="ស្វែងរកតាមឈ្មោះ User, Telegram Username ឬ កាលបរិច្ឆេទ...">
+                    </div>
+                    <div class="date-filter-group">
+                        <div>
+                            <label style="font-size: 13px; color: var(--text-muted); font-weight: 600; white-space: nowrap;"><i class="fa-solid fa-calendar-days"></i> ចាប់ពី៖</label>
+                            <input type="date" id="sum-user-date-start" class="date-input" style="padding: 8px 12px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 13px;">
+                        </div>
+                        <div>
+                            <label style="font-size: 13px; color: var(--text-muted); font-weight: 600; white-space: nowrap;">ដល់៖</label>
+                            <input type="date" id="sum-user-date-end" class="date-input" style="padding: 8px 12px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 13px;">
+                        </div>
+                        <div style="display: flex; gap: 8px; width: 100%; flex-wrap: wrap;">
+                            <button type="button" id="btn-sum-user-quick-today" class="btn btn-secondary btn-sm">ថ្ងៃនេះ</button>
+                            <button type="button" id="btn-sum-user-quick-yesterday" class="btn btn-secondary btn-sm">ម្សិលមិញ</button>
+                            <button type="button" id="btn-sum-user-quick-7days" class="btn btn-secondary btn-sm">៧ ថ្ងៃចុងក្រោយ</button>
+                            <button type="button" id="btn-sum-user-reset" class="btn btn-secondary btn-sm"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+                            <button type="button" id="btn-sum-user-export-excel" class="btn btn-success btn-sm"><i class="fa-solid fa-file-excel"></i> Export Excel</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Daily User Summary Data Table -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>កាលបរិច្ឆេទ (Date)</th>
+                                <th>ឈ្មោះអ្នកប្រើប្រាស់ (User Name / TG)</th>
+                                <th>ចំនួនទាញយកសរុប (Total Claimed)</th>
+                                <th>សេចក្តីលម្អិតតាម Category (User Breakdown)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="summarize-user-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 8. BOT CONTROLLER TAB -->
+        <section id="tab-bot-control" class="tab-pane">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-robot"></i> Telegram Bot Controller & Configuration</h2>
+            </div>
+
+            <div class="bot-control-grid">
+                <!-- Configuration Form -->
+                <div class="card bot-config-card">
+                    <h3><i class="fa-solid fa-key"></i> Telegram Bot Token & Settings</h3>
+                    <div class="form-group">
+                        <label>Bot Token ( Telegram Token):</label>
+                        <div class="input-with-button">
+                            <input type="password" id="bot-token-input" placeholder="Paste bot token here...">
+                            <button type="button" class="btn btn-secondary" id="btn-toggle-token"><i class="fa-solid fa-eye"></i></button>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="btn-save-config"><i class="fa-solid fa-floppy-disk"></i> រក្សាទុក (Save Configuration)</button>
+                    
+                    <hr style="border-color: var(--border-color); margin: 20px 0;">
+                    <h3 style="font-size: 16px;"><i class="fa-solid fa-user-lock"></i> កែប្រែពាក្យសម្ងាត់ Admin (Change Admin Password)</h3>
+                    <div class="form-group">
+                        <label>ពាក្យសម្ងាត់ចាស់ (Current Password):</label>
+                        <input type="password" id="change-pwd-old" placeholder="បញ្ចូលពាក្យសម្ងាត់ចាស់...">
+                    </div>
+                    <div class="form-group">
+                        <label>ពាក្យសម្ងាត់ថ្មី (New Password):</label>
+                        <input type="password" id="change-pwd-new" placeholder="បញ្ចូលពាក្យសម្ងាត់ថ្មី...">
+                    </div>
+                    <button class="btn btn-secondary" id="btn-save-admin-pwd"><i class="fa-solid fa-shield-halved"></i> កែប្រែពាក្យសម្ងាត់ (Update Password)</button>
+                </div>
+
+                <!-- Process Control Status & Logs -->
+                <div class="card bot-status-card">
+                    <div class="bot-status-header">
+                        <div>
+                            <h3><i class="fa-solid fa-terminal"></i> Bot Process Terminal Output</h3>
+                            <span class="status-indicator" id="bot-process-status-pill"><i class="fa-solid fa-circle red-text"></i> Stopped</span>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-success" id="btn-start-bot"><i class="fa-solid fa-play"></i> START BOT</button>
+                            <button class="btn btn-danger" id="btn-stop-bot" disabled><i class="fa-solid fa-stop"></i> STOP BOT</button>
+                        </div>
+                    </div>
+
+                    <!-- Live Terminal Output Area -->
+                    <div class="terminal-window" id="bot-terminal-logs">
+                        <div class="terminal-line text-muted">[System] Ready to start Python Telegram Bot process...</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- Account Claimed Result Modal -->
+    <div class="modal-overlay" id="modal-claim-result">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-circle-check text-green"></i> ទទួលបានគណនីជោគជ័យ! (Account Claimed)</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="claim-result-box">
+                    <div class="category-pill" id="claim-res-category">SB_CH</div>
+                    
+                    <!-- Clean Display Box -->
+                    <div class="combined-copy-box" id="btn-copy-both-card" style="cursor: pointer;">
+                        <div class="combined-info">
+                            <div><small>USERNAME:</small> <strong id="claim-res-user" class="field-val">user123</strong></div>
+                            <div><small>PASSWORD:</small> <strong id="claim-res-pass" class="field-val">pass123</strong></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="display: flex; gap: 12px; padding: 16px 24px; justify-content: space-between;">
+                <button class="btn btn-success flex-1" id="btn-copy-both-footer" style="padding: 12px 16px; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i class="fa-solid fa-copy"></i> <span>ចម្លង (Copy)</span>
+                </button>
+                <button class="btn btn-danger modal-close flex-1" style="padding: 12px 16px; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i class="fa-solid fa-right-from-bracket"></i> <span>ចាកចេញ (Exit)</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Account Modal -->
+    <div class="modal-overlay" id="modal-add-acc">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-plus"></i> បន្ថែមគណនីថ្មី (Add Single Account)</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-acc-form">
+                    <div class="form-group">
+                        <label>ជ្រើសរើស Menu / Category:</label>
+                        <select id="add-acc-menu" required>
+                            <!-- Options populated by JS -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Username (ឈ្មោះគណនី):</label>
+                        <input type="text" id="add-acc-user" required placeholder="e.g. user123">
+                    </div>
+                    <div class="form-group">
+                        <label>Password (ពាក្យសម្ងាត់):</label>
+                        <input type="text" id="add-acc-pass" required placeholder="e.g. pass123">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary modal-close">បោះបង់ (Cancel)</button>
+                <button class="btn btn-primary" id="btn-save-new-acc"><i class="fa-solid fa-check"></i> រក្សាទុក (Save)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Account Modal -->
+    <div class="modal-overlay" id="modal-edit-acc">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-pen-to-square"></i> កែប្រែគណនី (Edit Account)</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit-acc-id">
+                <div class="form-group">
+                    <label>Menu / Category:</label>
+                    <select id="edit-acc-menu" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Username:</label>
+                    <input type="text" id="edit-acc-user" required>
+                </div>
+                <div class="form-group">
+                    <label>Password:</label>
+                    <input type="text" id="edit-acc-pass" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary modal-close">បោះបង់ (Cancel)</button>
+                <button class="btn btn-primary" id="btn-save-edit-acc"><i class="fa-solid fa-check"></i> រក្សាទុក (Update)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN LOGIN MODAL -->
+    <div id="modal-admin-login" class="modal-overlay">
+        <div class="modal-card" style="max-width: 400px; padding: 0; border-radius: 14px; overflow: hidden; background: #0f172a; border: 1px solid var(--border-color);">
+            <div class="modal-header" style="padding: 16px 20px; background: rgba(30, 41, 59, 0.8); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0; font-size: 16px; color: #fff; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-user-shield" style="color: var(--primary);"></i> Admin Login</h3>
+                <button type="button" class="modal-close-btn" id="btn-close-admin-modal" style="background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer;">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 24px 20px;">
+                <form id="form-admin-login">
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label style="font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 8px; display: block;">សូមបញ្ចូលពាក្យសម្ងាត់ Admin:</label>
+                        <input type="password" id="admin-login-pwd-input" class="form-control" placeholder="បញ្ចូលពាក្យសម្ងាត់..." required style="width: 100%; padding: 12px 14px; background: #1e293b; border: 1px solid var(--border-color); border-radius: 8px; color: #fff; font-size: 14px; outline: none;">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block" style="padding: 12px; font-size: 15px; font-weight: 600; border-radius: 8px; width: 100%;">
+                        <i class="fa-solid fa-right-to-bracket"></i> ចូលប្រព័ន្ធ (Login)
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <!-- SheetJS for client-side Excel import and export -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: tgbot-web-app
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: ADMIN_PASSWORD
+        value: "13579"
