@@ -13,6 +13,31 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+const CLOUDFLARE_API_URL = process.env.WEB_APP_URL || 'https://tgbot-web-app.pages.dev';
+
+// Proxy Web App API requests to Cloudflare D1 Database
+app.use('/api', async (req, res, next) => {
+    if (req.path.startsWith('/bot/') || req.path === '/config' || req.path === '/status') {
+        return next();
+    }
+    try {
+        const targetUrl = `${CLOUDFLARE_API_URL.replace(/\/$/, '')}/api${req.path}`;
+        const fetchOptions = {
+            method: req.method,
+            headers: { 'Content-Type': req.headers['content-type'] || 'application/json' }
+        };
+        if (req.method !== 'GET' && req.method !== 'HEAD' && req.body) {
+            fetchOptions.body = JSON.stringify(req.body);
+        }
+        const cfRes = await fetch(targetUrl, fetchOptions);
+        const data = await cfRes.json();
+        return res.status(cfRes.status).json(data);
+    } catch (e) {
+        next();
+    }
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Configure Multer for uploads
@@ -566,10 +591,12 @@ function startBotProcess() {
 
     const env = Object.assign({}, process.env, {
         PYTHONUNBUFFERED: '1',
-        USER_BASE_DIR: __dirname
+        USER_BASE_DIR: __dirname,
+        TOKEN: process.env.BOT_TOKEN || process.env.TOKEN || ''
     });
 
-    botProcess = spawn('python', ['bot.py'], { cwd: __dirname, env });
+    const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
+    botProcess = spawn(pythonCmd, ['bot.py'], { cwd: __dirname, env });
 
     botProcess.stdout.on('data', (data) => {
         const text = data.toString('utf-8').trim();
@@ -587,8 +614,12 @@ function startBotProcess() {
     });
 
     botProcess.on('error', (err) => {
-        addBotLog(`Failed to start bot process: ${err.message}`);
-        botProcess = null;
+        addBotLog(`Failed to start bot process (${pythonCmd}): ${err.message}`);
+        if (pythonCmd === 'python3') {
+            try {
+                botProcess = spawn('python', ['bot.py'], { cwd: __dirname, env });
+            } catch(e) {}
+        }
     });
 
     return true;
