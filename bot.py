@@ -278,13 +278,21 @@ def get_sub_menu_emoji(sub_name):
 
 import urllib.request
 
-CLOUDFLARE_API_URL = os.environ.get("WEB_APP_URL", "https://tgbot-web-app.pages.dev").rstrip('/')
+import time
 
-def fetch_cloudflare_menus():
+CLOUDFLARE_API_URL = os.environ.get("WEB_APP_URL", "https://tgbot-web-app.pages.dev").rstrip('/')
+MENU_CACHE = {"main_menus": {}, "counts": {}, "timestamp": 0}
+CACHE_TTL_SECONDS = 5  # Cache for 5s for instant 0.1s menu response times
+
+def fetch_cloudflare_menus(force_refresh=False):
+    now = time.time()
+    if not force_refresh and (now - MENU_CACHE["timestamp"] < CACHE_TTL_SECONDS) and MENU_CACHE["main_menus"]:
+        return MENU_CACHE["main_menus"], MENU_CACHE["counts"]
+
     try:
         url = f"{CLOUDFLARE_API_URL}/api/menus"
         req = urllib.request.Request(url, headers={'User-Agent': 'TelegramBot/1.0'})
-        with urllib.request.urlopen(req, timeout=5) as response:
+        with urllib.request.urlopen(req, timeout=3) as response:
             if response.status == 200:
                 data = json.loads(response.read().decode('utf-8'))
                 raw_main_menus = data.get('main_menus', {})
@@ -306,10 +314,16 @@ def fetch_cloudflare_menus():
                             elif isinstance(item, str):
                                 sub_list.append(item)
                     parsed_main_menus[main_name] = sub_list
-                    
+                
+                MENU_CACHE["main_menus"] = parsed_main_menus
+                MENU_CACHE["counts"] = parsed_counts
+                MENU_CACHE["timestamp"] = now
                 return parsed_main_menus, parsed_counts
     except Exception as e:
         logging.error(f"Error fetching Cloudflare menus: {e}")
+    
+    if MENU_CACHE["main_menus"]:
+        return MENU_CACHE["main_menus"], MENU_CACHE["counts"]
     return {}, {}
 
 def claim_cloudflare_account(menu_name, user_name, tg_username):
@@ -321,10 +335,11 @@ def claim_cloudflare_account(menu_name, user_name, tg_username):
             "tg_username": tg_username
         }).encode('utf-8')
         req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json', 'User-Agent': 'TelegramBot/1.0'})
-        with urllib.request.urlopen(req, timeout=5) as response:
+        with urllib.request.urlopen(req, timeout=4) as response:
             if response.status == 200:
                 data = json.loads(response.read().decode('utf-8'))
                 if data.get('success'):
+                    MENU_CACHE["timestamp"] = 0  # Invalidate cache on claim
                     return data.get('account', {}), data.get('remaining', 0)
     except Exception as e:
         logging.error(f"Error claiming Cloudflare account: {e}")
