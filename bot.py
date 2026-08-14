@@ -338,6 +338,7 @@ def get_user_reply_keyboard(user_id, context=None):
             menu_buttons.append(f"{emoji} {menu} ({count})")
         
         keyboard = chunk_list(menu_buttons, 2)
+        keyboard.append(["⬅️ ត្រឡប់ក្រោយ (Back)"])
     else:
         main_menu_buttons = []
         for i, main_menu in enumerate(active_main_menus.keys()):
@@ -514,9 +515,12 @@ async def handle_menu_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     # Check if it matches a Main Menu name
+    cf_main_menus, cf_counts = fetch_cloudflare_menus()
+    active_main_menus = cf_main_menus if cf_main_menus else MAIN_MENUS
+
     matched_main = None
     if not context.user_data.get('current_main_menu'):
-        for main_menu in MAIN_MENUS.keys():
+        for main_menu in active_main_menus.keys():
             if main_menu in menu_text:
                 matched_main = main_menu
                 break
