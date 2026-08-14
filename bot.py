@@ -276,38 +276,73 @@ def get_sub_menu_emoji(sub_name):
     if sub_name.startswith('CK99'): return '🎮'
     return '🔹'
 
+import urllib.request
+
+CLOUDFLARE_API_URL = os.environ.get("WEB_APP_URL", "https://tgbot-web-app.pages.dev").rstrip('/')
+
+def fetch_cloudflare_menus():
+    try:
+        url = f"{CLOUDFLARE_API_URL}/api/menus"
+        req = urllib.request.Request(url, headers={'User-Agent': 'TelegramBot/1.0'})
+        with urllib.request.urlopen(req, timeout=5) as response:
+            if response.status == 200:
+                data = json.loads(response.read().decode('utf-8'))
+                return data.get('main_menus', {}), data.get('counts', {})
+    except Exception as e:
+        logging.error(f"Error fetching Cloudflare menus: {e}")
+    return {}, {}
+
+def claim_cloudflare_account(menu_name, user_name, tg_username):
+    try:
+        url = f"{CLOUDFLARE_API_URL}/api/claim"
+        payload = json.dumps({
+            "menu_name": menu_name,
+            "user_name": user_name,
+            "tg_username": tg_username
+        }).encode('utf-8')
+        req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json', 'User-Agent': 'TelegramBot/1.0'})
+        with urllib.request.urlopen(req, timeout=5) as response:
+            if response.status == 200:
+                data = json.loads(response.read().decode('utf-8'))
+                if data.get('success'):
+                    return data.get('account', {}), data.get('remaining', 0)
+    except Exception as e:
+        logging.error(f"Error claiming Cloudflare account: {e}")
+    return None, 0
+
 # Helper function to generate user reply keyboard with updated counts and layout
 def get_user_reply_keyboard(user_id, context=None):
-    db_path = os.path.join(BASE_DIR, 'bot_data.db')
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    
+    cf_main_menus, cf_counts = fetch_cloudflare_menus()
+    active_main_menus = cf_main_menus if cf_main_menus else MAIN_MENUS
+
     current_main = None
     if context and 'current_main_menu' in context.user_data:
         current_main = context.user_data['current_main_menu']
         
-    if current_main and current_main in MAIN_MENUS:
-        # User is in a Main Menu, show its Sub Menus
-        sub_menus = MAIN_MENUS[current_main]
+    if current_main and current_main in active_main_menus:
+        sub_menus = active_main_menus[current_main]
         menu_buttons = []
-        for i, menu in enumerate(sub_menus):
-            try:
-                cursor.execute("SELECT COUNT(*) FROM accounts WHERE menu_name = ?", (menu,))
-                count = cursor.fetchone()[0]
-            except Exception:
-                count = 0
+        for menu in sub_menus:
+            count = cf_counts.get(menu, 0) if cf_counts else 0
+            if not cf_counts:
+                try:
+                    db_path = os.path.join(BASE_DIR, 'bot_data.db')
+                    conn = sqlite3.connect(db_path)
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT COUNT(*) FROM accounts WHERE menu_name = ?", (menu,))
+                    count = cursor.fetchone()[0]
+                    conn.close()
+                except Exception:
+                    count = 0
             emoji = get_sub_menu_emoji(menu)
             menu_buttons.append(f"{emoji} {menu} ({count})")
-        conn.close()
         
         keyboard = chunk_list(menu_buttons, 2)
     else:
-        # Show Main Menus
         main_menu_buttons = []
-        for i, main_menu in enumerate(MAIN_MENUS.keys()):
+        for i, main_menu in enumerate(active_main_menus.keys()):
             emoji = EMOJI_LIST[i % len(EMOJI_LIST)]
             main_menu_buttons.append(f"{emoji} {main_menu}")
-        conn.close()
         
         keyboard = chunk_list(main_menu_buttons, 3)
             
@@ -494,7 +529,14 @@ async def handle_menu_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Extract menu name by matching the longest configured menu name in the text
     actual_menu_name = None
-    for menu in sorted(MENUS, key=len, reverse=True):
+    all_known_menus = set(MENUS)
+    for subs in MAIN_MENUS.values():
+        all_known_menus.update(subs)
+    cf_main, cf_counts = fetch_cloudflare_menus()
+    for subs in cf_main.values():
+        all_known_menus.update(subs)
+
+    for menu in sorted(all_known_menus, key=len, reverse=True):
         if menu in menu_text:
             actual_menu_name = menu
             break
@@ -502,6 +544,36 @@ async def handle_menu_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not actual_menu_name:
         await start(update, context)
         return
+
+    user = update.effective_user
+    user_id = user.id
+    tg_username = f"@{user.username}" if user.username else f"id_{user.id}"
+    tg_name = f"{user.first_name or ''} {user.last_name or ''}".strip()
+
+    # 1. Claim from Cloudflare D1 Database REST API
+    cf_account, rem_stock = claim_cloudflare_account(actual_menu_name, tg_name, tg_username)
+    if cf_account and cf_account.get('username'):
+        acc_user = cf_account.get('username')
+        acc_pass = cf_account.get('password')
+
+        current_msg_id = update.message.message_id
+        for i in range(6):
+            try:
+                await context.bot.delete_message(chat_id=update.effective_chat.id, message_id=current_msg_id - i)
+            except Exception:
+                pass
+
+        response = f"<b>✅ គណនី {actual_menu_name} របស់អ្នក៖</b>\n\n<code>{acc_user}\n{acc_pass}</code>"
+        reply_markup = get_user_reply_keyboard(user_id, context)
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=response,
+            reply_markup=reply_markup,
+            parse_mode="HTML"
+        )
+        return
+
+    # 2. Local Fallback if Cloudflare has no stock or API unavailable
     db_path = os.path.join(BASE_DIR, 'bot_data.db')
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -511,21 +583,12 @@ async def handle_menu_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         if row:
             account_id, acc_user, acc_pass = row
-            # Delete from Database immediately (One-time use)
             cursor.execute("DELETE FROM accounts WHERE id = ?", (account_id,))
-            
-            # Get remaining stock count for this menu
             cursor.execute("SELECT COUNT(*) FROM accounts WHERE menu_name = ?", (actual_menu_name,))
             rem_row = cursor.fetchone()
             stock_left = rem_row[0] if rem_row else 0
 
-            # Log to download history
-            user = update.effective_user
-            user_id = user.id
-            tg_username = user.username or ""
-            tg_name = f"{user.first_name or ''} {user.last_name or ''}".strip()
             now_phnom_penh = get_phnom_penh_time_str()
-            
             try:
                 cursor.execute("ALTER TABLE history ADD COLUMN stock_left INTEGER DEFAULT 0")
             except Exception:
@@ -537,7 +600,6 @@ async def handle_menu_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
             """, (user_id, tg_username, tg_name, actual_menu_name, acc_user, acc_pass, now_phnom_penh, stock_left))
             conn.commit()
             
-            # Delete previous prompt messages before sending credentials
             current_msg_id = update.message.message_id
             for i in range(6):
                 try:
@@ -545,7 +607,6 @@ async def handle_menu_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 except Exception:
                     pass
 
-            # Send single clean credentials message
             response = f"<b>✅ គណនី {actual_menu_name} របស់អ្នក៖</b>\n\n<code>{acc_user}\n{acc_pass}</code>"
             reply_markup = get_user_reply_keyboard(user_id, context)
             await context.bot.send_message(
