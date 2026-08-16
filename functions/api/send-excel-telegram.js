@@ -14,7 +14,7 @@ export async function onRequestPost(context) {
             });
         }
 
-        // Fetch Bot Token from env or D1 settings
+        // Fetch Bot Token from env, D1 settings, or default fallback
         let token = env.BOT_TOKEN;
         if (!token && db) {
             try {
@@ -22,12 +22,8 @@ export async function onRequestPost(context) {
                 if (row && row.value) token = row.value;
             } catch (e) {}
         }
-
         if (!token) {
-            return new Response(JSON.stringify({ success: false, error: 'Telegram Bot Token is not configured' }), {
-                status: 400,
-                headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-            });
+            token = '8863517367:AAGiakygaWQASSwIJRhH52yidJA7GfZigZI';
         }
 
         // Convert Base64 string to Uint8Array Uint8Array / Blob
@@ -40,7 +36,7 @@ export async function onRequestPost(context) {
         const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         const formData = new FormData();
         formData.append('chat_id', user_id);
-        formData.append('caption', '📊 នេះជាឯកសារទិន្នន័យទាំងអស់ (Export All Data .xlsx)');
+        formData.append('caption', '📊 នេះជាឯកសារស្តុកនៅសល់ទាំងអស់ (Export Remaining Stock .xlsx)');
         formData.append('document', blob, filename || 'Export_All_Data.xlsx');
 
         const tgRes = await fetch(`https://api.telegram.org/bot${token}/sendDocument`, {
