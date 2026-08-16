@@ -954,7 +954,21 @@ function initExcelDropZone() {
     }
 }
 
-// Export ONLY Live Available Stock Accounts (.xlsx)
+// Download Sample Import Template (.xlsx)
+function exportTemplateExcel() {
+    const sampleRows = [
+        { menu_name: "SB_CH", username: "user123", password: "pass123" },
+        { menu_name: "SB_CH_KH", username: "user456", password: "pass456" },
+        { menu_name: "CK99_CH", username: "user789", password: "pass789" }
+    ];
+    const workbook = XLSX.utils.book_new();
+    const sheet = XLSX.utils.json_to_sheet(sampleRows);
+    XLSX.utils.book_append_sheet(workbook, sheet, "Data_Entry");
+    XLSX.writeFile(workbook, "Sample_Accounts_Template.xlsx");
+    showToast('✅ ទាញយកឯកសារគំរូ Excel រួចរាល់!', 'success');
+}
+
+// Export ONLY Live Available Stock Accounts - SINGLE FILE (.xlsx)
 async function exportAllDataExcel() {
     try {
         showToast('⏳ កំពុងរៀបចំទាញយកស្តុកដែលនៅសល់ទាំងអស់... សូមរង់ចាំមួយភ្លែត', 'info');
@@ -982,7 +996,7 @@ async function exportAllDataExcel() {
         const todayStr = new Date().toISOString().slice(0, 10);
         const filename = `All_Available_Stock_${todayStr}.xlsx`;
 
-        // 1. Download to Browser
+        // 1. Single File Download to Browser
         XLSX.writeFile(workbook, filename);
         showToast(`✅ បានទាញយកស្តុកនៅសល់សរុប ${accounts.length} គណនី ដោយជោគជ័យ!`, 'success');
 
@@ -1014,8 +1028,8 @@ async function exportAllDataExcel() {
     }
 }
 
-document.getElementById('btn-export-excel-template')?.addEventListener('click', exportAllDataExcel);
-document.getElementById('btn-export-excel-history')?.addEventListener('click', exportAllDataExcel);
+document.getElementById('btn-export-excel-template')?.addEventListener('click', exportTemplateExcel);
+document.getElementById('btn-export-all-stock')?.addEventListener('click', exportAllDataExcel);
 
 
 // ================= 5. MENUS MANAGEMENT =================
