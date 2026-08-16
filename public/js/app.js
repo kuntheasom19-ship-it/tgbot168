@@ -954,84 +954,39 @@ function initExcelDropZone() {
     }
 }
 
-// Export All Data Excel (Data_Entry, menu_name, All Data, History) & Send to Telegram Mini App
+// Export ONLY Live Available Stock Accounts (.xlsx)
 async function exportAllDataExcel() {
     try {
-        showToast('⏳ កំពុងរៀបចំឯកសារ Excel... សូមរង់ចាំមួយភ្លែត', 'info');
+        showToast('⏳ កំពុងរៀបចំទាញយកស្តុកដែលនៅសល់ទាំងអស់... សូមរង់ចាំមួយភ្លែត', 'info');
 
-        const [accRes, menuRes, histRes] = await Promise.all([
-            fetch('/api/accounts?all=true'),
-            fetch('/api/menus'),
-            fetch('/api/history?limit=1000')
-        ]);
+        const res = await fetch('/api/accounts?all=true');
+        const data = await res.json();
+        const accounts = data.accounts || [];
 
-        const accData = await accRes.json();
-        const menuData = await menuRes.json();
-        const histData = await histRes.json();
-
-        const accounts = accData.accounts || [];
-        const mainMenus = menuData.main_menus || {};
-        const countMap = menuData.counts || {};
-        const historyLogs = histData.history || [];
-
-        // Sheet 1: Data_Entry
-        const sampleRows = [
-            { menu_name: "SB_CH", username: "user123", password: "pass123" },
-            { menu_name: "SB_CH_KH", username: "user456", password: "pass456" },
-            { menu_name: "CK99_CH", username: "user789", password: "pass789" }
-        ];
-
-        // Sheet 2: menu_name
-        const menuRows = [];
-        for (const [main, subs] of Object.entries(mainMenus)) {
-            subs.forEach(s => {
-                const subName = typeof s === 'object' ? s.name : s;
-                menuRows.push({
-                    "Main Menu": main,
-                    "Sub Menu": subName,
-                    "Stock Amount": countMap[subName] || 0
-                });
-            });
+        if (!accounts || accounts.length === 0) {
+            showToast('⚠️ គ្មានស្តុកគណនីនៅសល់សម្រាប់ Export ឡើយ!', 'error');
+            return;
         }
-        menuRows.sort((a, b) => a["Stock Amount"] - b["Stock Amount"]);
 
-        // Sheet 3: All Data
+        // Export ONLY live available accounts in stock (menu_name, username, password)
         const allAccountRows = accounts.map(a => ({
             "menu_name": a.menu_name,
             "username": a.username,
             "password": a.password
         }));
 
-        // Sheet 4: History
-        const historyRows = historyLogs.map(h => ({
-            "Log ID": h.id,
-            "User Name (ឈ្មោះអ្នកប្រើ)": h.tg_name || 'Web User',
-            "Telegram Username": h.tg_username ? `@${h.tg_username}` : '',
-            "Menu Name": h.menu_name,
-            "Account Username": h.account_username,
-            "Account Password": h.account_password,
-            "Stock Left (ស្តុកនៅសល់)": h.stock_left !== undefined ? h.stock_left : 0,
-            "Timestamp (កាលបរិច្ឆេទ)": h.timestamp
-        }));
-
         const workbook = XLSX.utils.book_new();
-        const sheet1 = XLSX.utils.json_to_sheet(sampleRows);
-        const sheet2 = XLSX.utils.json_to_sheet(menuRows);
-        const sheet3 = XLSX.utils.json_to_sheet(allAccountRows);
-        const sheet4 = XLSX.utils.json_to_sheet(historyRows);
+        const sheet = XLSX.utils.json_to_sheet(allAccountRows);
+        XLSX.utils.book_append_sheet(workbook, sheet, "All Data");
 
-        XLSX.utils.book_append_sheet(workbook, sheet1, "Data_Entry");
-        XLSX.utils.book_append_sheet(workbook, sheet2, "menu_name");
-        XLSX.utils.book_append_sheet(workbook, sheet3, "All Data");
-        XLSX.utils.book_append_sheet(workbook, sheet4, "History");
-
-        const filename = `Export_All_Data_${new Date().toISOString().slice(0, 10)}.xlsx`;
+        const todayStr = new Date().toISOString().slice(0, 10);
+        const filename = `All_Available_Stock_${todayStr}.xlsx`;
 
         // 1. Download to Browser
         XLSX.writeFile(workbook, filename);
-        showToast('✅ ទាញយកឯកសារ Excel ដោយជោគជ័យ!', 'success');
+        showToast(`✅ បានទាញយកស្តុកនៅសល់សរុប ${accounts.length} គណនី ដោយជោគជ័យ!`, 'success');
 
-        // 2. Telegram Mini App Auto Send
+        // 2. Telegram Mini App Auto Send to Telegram Chat
         const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
         if (tgUser && tgUser.id) {
             try {
@@ -1047,7 +1002,7 @@ async function exportAllDataExcel() {
                 });
                 const sendData = await sendRes.json();
                 if (sendData.success) {
-                    showToast('📨 បានផ្ញើឯកសារ Excel ចូល Telegram Chat របស់អ្នករួចរាល់!', 'success');
+                    showToast('📨 បានផ្ញើឯកសារស្តុក Excel ចូល Telegram Chat របស់អ្នករួចរាល់!', 'success');
                 }
             } catch (err) {
                 console.error('Failed to send Excel to Telegram chat:', err);
@@ -1055,7 +1010,7 @@ async function exportAllDataExcel() {
         }
 
     } catch (err) {
-        showToast(`❌ បរាជ័យក្នុងការ Export Excel: ${err.message}`, 'error');
+        showToast(`❌ បរាជ័យក្នុងការ Export ស្តុក Excel: ${err.message}`, 'error');
     }
 }
 

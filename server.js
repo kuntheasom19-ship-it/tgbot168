@@ -18,7 +18,7 @@ const CLOUDFLARE_API_URL = process.env.WEB_APP_URL || 'https://tgbot-web-app.pag
 
 // Proxy Web App API requests to Cloudflare D1 Database
 app.use('/api', async (req, res, next) => {
-    if (req.path.startsWith('/bot/') || req.path === '/config' || req.path === '/status') {
+    if (req.path.startsWith('/bot/') || req.path === '/config') {
         return next();
     }
     try {
