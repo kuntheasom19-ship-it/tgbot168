@@ -28,23 +28,14 @@ export async function onRequestPost(context) {
             });
         }
 
-        // Send Message 1: Notice matching Telegram bot claim response
+        // Send Message in Telegram default font
+        const message = `<b>✅ គណនី ${menu_name} របស់អ្នក៖</b>\n\n${username}\n${password}`;
         await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 chat_id: user_id,
-                text: `នេះជាគណនី ${menu_name} របស់អ្នក៖`
-            })
-        });
-
-        // Send Message 2: Monospace Username & Password for 1-click copy matching Telegram bot
-        await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: user_id,
-                text: `<code>${username}\n${password}</code>`,
+                text: message,
                 parse_mode: 'HTML'
             })
         });
