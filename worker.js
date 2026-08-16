@@ -250,9 +250,13 @@ export default {
 
         // 4. Accounts Management
         if (path === '/api/accounts' && method === 'GET') {
-            const isAll = url.searchParams.get('all') === 'true' || url.searchParams.get('export') === 'true' || url.searchParams.get('backup') === 'true';
+            const isAll = url.searchParams.get('all') === 'true' || 
+                          url.searchParams.get('export') === 'true' || 
+                          url.searchParams.get('backup') === 'true' || 
+                          url.searchParams.get('limit') === '1000000' ||
+                          url.searchParams.get('all') === '1';
             const page = parseInt(url.searchParams.get('page')) || 1;
-            const limit = isAll ? 1000000 : (parseInt(url.searchParams.get('limit')) || 20);
+            const limit = isAll ? 100000 : (parseInt(url.searchParams.get('limit')) || 20);
             const offset = isAll ? 0 : (page - 1) * limit;
             const filterMenu = url.searchParams.get('menu');
             const search = url.searchParams.get('q');

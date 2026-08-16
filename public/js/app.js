@@ -959,7 +959,7 @@ async function exportAllDataExcel() {
     try {
         showToast('⏳ កំពុងរៀបចំទាញយកស្តុកដែលនៅសល់ទាំងអស់... សូមរង់ចាំមួយភ្លែត', 'info');
 
-        const res = await fetch('/api/accounts?all=true');
+        const res = await fetch('/api/accounts?all=true&export=true&limit=100000');
         const data = await res.json();
         const accounts = data.accounts || [];
 
