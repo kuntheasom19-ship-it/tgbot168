@@ -22,7 +22,7 @@ app.use('/api', async (req, res, next) => {
         return next();
     }
     try {
-        const targetUrl = `${CLOUDFLARE_API_URL.replace(/\/$/, '')}/api${req.path}`;
+        const targetUrl = `${CLOUDFLARE_API_URL.replace(/\/$/, '')}${req.originalUrl}`;
         const fetchOptions = {
             method: req.method,
             headers: { 'Content-Type': req.headers['content-type'] || 'application/json' }
