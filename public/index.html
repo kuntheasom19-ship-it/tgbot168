@@ -65,9 +65,6 @@
                 <button class="nav-tab admin-only-tab" data-tab="summarize" style="display: none;">
                     <i class="fa-solid fa-chart-column"></i> <span>Summarize</span>
                 </button>
-                <button class="nav-tab admin-only-tab" data-tab="bot-control" style="display: none;">
-                    <i class="fa-solid fa-robot"></i> <span>Bot Controller</span>
-                </button>
             </nav>
         </div>
     </header>
@@ -589,60 +586,6 @@
                             <!-- Populated by JS -->
                         </tbody>
                     </table>
-                </div>
-            </div>
-        </section>
-
-
-        <!-- 8. BOT CONTROLLER TAB -->
-        <section id="tab-bot-control" class="tab-pane">
-            <div class="section-header">
-                <h2><i class="fa-solid fa-robot"></i> Telegram Bot Controller & Configuration</h2>
-            </div>
-
-            <div class="bot-control-grid">
-                <!-- Configuration Form -->
-                <div class="card bot-config-card">
-                    <h3><i class="fa-solid fa-key"></i> Telegram Bot Token & Settings</h3>
-                    <div class="form-group">
-                        <label>Bot Token ( Telegram Token):</label>
-                        <div class="input-with-button">
-                            <input type="password" id="bot-token-input" placeholder="Paste bot token here...">
-                            <button type="button" class="btn btn-secondary" id="btn-toggle-token"><i class="fa-solid fa-eye"></i></button>
-                        </div>
-                    </div>
-                    <button class="btn btn-primary" id="btn-save-config"><i class="fa-solid fa-floppy-disk"></i> រក្សាទុក (Save Configuration)</button>
-                    
-                    <hr style="border-color: var(--border-color); margin: 20px 0;">
-                    <h3 style="font-size: 16px;"><i class="fa-solid fa-user-lock"></i> កែប្រែពាក្យសម្ងាត់ Admin (Change Admin Password)</h3>
-                    <div class="form-group">
-                        <label>ពាក្យសម្ងាត់ចាស់ (Current Password):</label>
-                        <input type="password" id="change-pwd-old" placeholder="បញ្ចូលពាក្យសម្ងាត់ចាស់...">
-                    </div>
-                    <div class="form-group">
-                        <label>ពាក្យសម្ងាត់ថ្មី (New Password):</label>
-                        <input type="password" id="change-pwd-new" placeholder="បញ្ចូលពាក្យសម្ងាត់ថ្មី...">
-                    </div>
-                    <button class="btn btn-secondary" id="btn-save-admin-pwd"><i class="fa-solid fa-shield-halved"></i> កែប្រែពាក្យសម្ងាត់ (Update Password)</button>
-                </div>
-
-                <!-- Process Control Status & Logs -->
-                <div class="card bot-status-card">
-                    <div class="bot-status-header">
-                        <div>
-                            <h3><i class="fa-solid fa-terminal"></i> Bot Process Terminal Output</h3>
-                            <span class="status-indicator" id="bot-process-status-pill"><i class="fa-solid fa-circle red-text"></i> Stopped</span>
-                        </div>
-                        <div class="btn-group">
-                            <button class="btn btn-success" id="btn-start-bot"><i class="fa-solid fa-play"></i> START BOT</button>
-                            <button class="btn btn-danger" id="btn-stop-bot" disabled><i class="fa-solid fa-stop"></i> STOP BOT</button>
-                        </div>
-                    </div>
-
-                    <!-- Live Terminal Output Area -->
-                    <div class="terminal-window" id="bot-terminal-logs">
-                        <div class="terminal-line text-muted">[System] Ready to start Python Telegram Bot process...</div>
-                    </div>
                 </div>
             </div>
         </section>
