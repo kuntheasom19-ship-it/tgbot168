@@ -29,9 +29,21 @@ export async function onRequest(context) {
                       url.searchParams.get('backup') === 'true' || 
                       url.searchParams.get('limit') === '1000000' ||
                       url.searchParams.get('all') === '1';
+
+        if (isAll) {
+            const rows = db ? await db.prepare(`SELECT * FROM accounts ORDER BY id ASC LIMIT 100000`).all() : { results: [] };
+            const accountsList = rows.results || [];
+            return jsonResponse({
+                accounts: accountsList,
+                total: accountsList.length,
+                page: 1,
+                totalPages: 1
+            });
+        }
+
         const page = parseInt(url.searchParams.get('page')) || 1;
-        const limit = isAll ? 100000 : (parseInt(url.searchParams.get('limit')) || 20);
-        const offset = isAll ? 0 : (page - 1) * limit;
+        const limit = parseInt(url.searchParams.get('limit')) || 20;
+        const offset = (page - 1) * limit;
         const q = url.searchParams.get('q') ? `%${url.searchParams.get('q')}%` : '%';
         const menu = url.searchParams.get('menu');
 
@@ -51,7 +63,7 @@ export async function onRequest(context) {
             accounts: rows.results || [],
             total: countRow ? countRow.total : 0,
             page,
-            totalPages: isAll ? 1 : Math.ceil((countRow ? countRow.total : 0) / limit)
+            totalPages: Math.ceil((countRow ? countRow.total : 0) / limit)
         });
     }
 
