@@ -1001,15 +1001,20 @@ async function exportAllDataExcel() {
         showToast(`✅ បានទាញយកស្តុកនៅសល់សរុប ${accounts.length} គណនី ដោយជោគជ័យ!`, 'success');
 
         // 2. Telegram Mini App Auto Send to Telegram Chat
-        const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-        if (tgUser && tgUser.id) {
+        let userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+        if (!userId) {
+            const urlParams = new URLSearchParams(window.location.search);
+            userId = urlParams.get('user_id') || urlParams.get('tg_id') || urlParams.get('id');
+        }
+
+        if (userId) {
             try {
                 const wbBase64 = XLSX.write(workbook, { bookType: 'xlsx', type: 'base64' });
                 const sendRes = await fetch('/api/send-excel-telegram', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        user_id: tgUser.id,
+                        user_id: userId,
                         filename: filename,
                         file_base64: wbBase64
                     })
@@ -1017,6 +1022,8 @@ async function exportAllDataExcel() {
                 const sendData = await sendRes.json();
                 if (sendData.success) {
                     showToast('📨 បានផ្ញើឯកសារស្តុក Excel ចូល Telegram Chat របស់អ្នករួចរាល់!', 'success');
+                } else {
+                    console.warn('Telegram Excel send API response:', sendData);
                 }
             } catch (err) {
                 console.error('Failed to send Excel to Telegram chat:', err);
