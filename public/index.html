@@ -74,15 +74,18 @@
         <!-- 1. USER PORTAL TAB -->
         <section id="tab-user-portal" class="tab-pane active">
 
-            <!-- Main Category Selection Dropdown Bar -->
-            <div class="category-dropdown-bar" id="portal-category-container" style="display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 24px; padding: 14px 20px; background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-color); border-radius: var(--radius-lg); flex-wrap: wrap;">
-                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                    <label for="portal-category-select" style="font-weight: 700; font-size: 15px; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
-                        <i class="fa-solid fa-layer-group" style="color: var(--primary);"></i> ជ្រើសរើស៖
+            <!-- Main Category Selection Bar & Pills Slider -->
+            <div class="category-dropdown-bar" id="portal-category-container">
+                <div class="category-header-wrap">
+                    <label for="portal-category-select" class="category-select-label">
+                        <i class="fa-solid fa-layer-group"></i> ជ្រើសរើស៖
                     </label>
-                    <select id="portal-category-select" onchange="selectPortalCategory(this.value)" style="padding: 10px 16px; background: #1e293b; border: 1px solid var(--border-color); border-radius: 8px; color: #f8fafc; font-size: 15px; font-weight: 600; outline: none; cursor: pointer; min-width: 240px;">
+                    <select id="portal-category-select" onchange="selectPortalCategory(this.value)" class="custom-category-select">
                         <!-- Dynamically populated by JS -->
                     </select>
+                </div>
+                <div class="category-pills-wrapper" id="portal-category-pills">
+                    <!-- Dynamic category pills slider -->
                 </div>
             </div>
 
@@ -706,6 +709,42 @@
             </div>
         </div>
     </div>
+
+    <!-- Floating Bottom Mobile Navigation Bar (Matching Image 2 Style) -->
+    <nav class="bottom-nav-bar" id="bottom-nav-bar">
+        <div class="bottom-nav-container">
+            <button type="button" class="bottom-nav-item active" data-tab="user-portal">
+                <div class="bottom-nav-pill">
+                    <i class="fa-solid fa-house"></i>
+                    <span>ទំព័រដើម</span>
+                </div>
+            </button>
+            <button type="button" class="bottom-nav-item admin-only-tab" data-tab="dashboard" style="display: none;">
+                <div class="bottom-nav-pill">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </div>
+            </button>
+            <button type="button" class="bottom-nav-item admin-only-tab" data-tab="accounts" style="display: none;">
+                <div class="bottom-nav-pill">
+                    <i class="fa-solid fa-users"></i>
+                    <span>គណនី</span>
+                </div>
+            </button>
+            <button type="button" class="bottom-nav-item admin-only-tab" data-tab="menus" style="display: none;">
+                <div class="bottom-nav-pill">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>ម៉ឺនុយ</span>
+                </div>
+            </button>
+            <button type="button" class="bottom-nav-item admin-only-tab" data-tab="history" style="display: none;">
+                <div class="bottom-nav-pill">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>ប្រវត្តិ</span>
+                </div>
+            </button>
+        </div>
+    </nav>
 
     <!-- Toast Notification Container -->
     <div id="toast-container"></div>
