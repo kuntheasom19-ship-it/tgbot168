@@ -1,4 +1,4 @@
-const DEFAULT_TOKEN = "";
+const DEFAULT_TOKEN = "8853663191:AAFZXa_aYKGzNyVVwSmuX6V_dHYw6jbSy3M";
 
 export async function onRequestPost(context) {
     const { request, env } = context;
