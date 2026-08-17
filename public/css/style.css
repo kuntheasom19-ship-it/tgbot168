@@ -1716,3 +1716,360 @@ body {
     }
 }
 
+/* ==========================================================================
+   MOBILE BOTTOM NAVIGATION BAR (MATCHING IMAGE 2 DESIGN)
+   ========================================================================== */
+
+/* Main Page Padding for Bottom Bar */
+body {
+    padding-bottom: 90px !important;
+}
+
+.bottom-nav-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: rgba(11, 15, 25, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 8px 12px 12px 12px;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+}
+
+.bottom-nav-container {
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: 6px;
+}
+
+.bottom-nav-item {
+    background: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 0;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Pill container matching Image 2 */
+.bottom-nav-pill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: var(--radius-pill);
+    color: #94A3B8;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+}
+
+.bottom-nav-pill i {
+    font-size: 17px;
+    transition: transform 0.25s ease;
+}
+
+/* Active State - White / Bright Pill Capsule like Image 2 */
+.bottom-nav-item.active .bottom-nav-pill {
+    background: #FFFFFF;
+    color: #0F172A;
+    font-weight: 700;
+    box-shadow: 0 4px 18px rgba(255, 255, 255, 0.3), 0 0 12px rgba(125, 186, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+.bottom-nav-item.active .bottom-nav-pill i {
+    color: #0F172A;
+    transform: scale(1.1);
+}
+
+.bottom-nav-item:active .bottom-nav-pill {
+    transform: scale(0.95);
+}
+
+/* On Mobile screens, hide top nav tabs to prioritize bottom bar like native Telegram app */
+@media (max-width: 768px) {
+    .nav-tabs {
+        display: none !important;
+    }
+}
+
+@media (min-width: 769px) {
+    .bottom-nav-bar {
+        padding: 10px 24px;
+    }
+}
+
+
+/* ==========================================================================
+   CATEGORY SELECTION & HORIZONTAL PILL SLIDER
+   ========================================================================== */
+
+.category-dropdown-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 24px;
+    padding: 16px 20px;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+}
+
+.category-header-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.category-select-label {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.category-select-label i {
+    color: var(--primary);
+}
+
+.custom-category-select {
+    padding: 10px 16px;
+    background: #1E293B;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: #F8FAFC;
+    font-size: 14px;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+    min-width: 220px;
+    transition: border-color 0.2s ease;
+}
+
+.custom-category-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 10px rgba(125, 186, 0, 0.3);
+}
+
+.category-pills-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.category-pills-wrapper::-webkit-scrollbar {
+    height: 4px;
+}
+
+.category-pills-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.cat-pill-tab {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    padding: 8px 16px;
+    border-radius: var(--radius-pill);
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.cat-pill-tab:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(125, 186, 0, 0.5);
+}
+
+.cat-pill-tab.active {
+    background: var(--primary-gradient);
+    color: #FFFFFF;
+    border-color: var(--primary);
+    box-shadow: 0 4px 14px rgba(125, 186, 0, 0.4);
+}
+
+.cat-pill-badge {
+    background: rgba(0, 0, 0, 0.3);
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: var(--radius-pill);
+}
+
+.cat-pill-tab.active .cat-pill-badge {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+
+/* ==========================================================================
+   ENHANCED SUB-MENU ACCOUNT BUTTONS (FRESH & ATTRACTIVE UI)
+   ========================================================================== */
+
+.sub-menus-grid {
+    padding: 16px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.sub-menu-telegram-btn {
+    width: 100%;
+    height: 52px;
+    padding: 8px 14px;
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: var(--radius-md);
+    color: #FFFFFF;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 15px rgba(2, 132, 199, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.sub-menu-telegram-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.sub-menu-telegram-btn:hover::before {
+    left: 100%;
+}
+
+.btn-content-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #FFFFFF !important;
+}
+
+.btn-icon-emoji {
+    font-size: 16px;
+    margin-right: 4px;
+    flex-shrink: 0;
+}
+
+.btn-name {
+    color: #FFFFFF !important;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+    flex: 1;
+    text-align: left;
+}
+
+.stock-num {
+    background: rgba(0, 0, 0, 0.25);
+    color: #FFFFFF !important;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 3px 9px;
+    border-radius: var(--radius-pill);
+    flex-shrink: 0;
+    line-height: 1;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.sub-menu-telegram-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+    border-color: #FFFFFF;
+    box-shadow: 0 8px 24px rgba(56, 189, 248, 0.5);
+    transform: translateY(-2px);
+}
+
+.sub-menu-telegram-btn:active:not(:disabled) {
+    transform: scale(0.96);
+}
+
+.sub-menu-telegram-btn:disabled,
+.sub-menu-telegram-btn.no-stock {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: rgba(30, 41, 59, 0.8) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: none !important;
+}
+
+.sub-menu-telegram-btn.no-stock .btn-name {
+    color: #94A3B8 !important;
+}
+
+.sub-menu-telegram-btn.no-stock .stock-num {
+    background: rgba(239, 68, 68, 0.15);
+    color: #F87171 !important;
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+@media (max-width: 480px) {
+    .sub-menus-grid {
+        padding: 12px 10px;
+        gap: 10px;
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .sub-menu-telegram-btn {
+        height: 48px;
+        padding: 6px 10px;
+    }
+    .btn-content-row {
+        font-size: 13.5px;
+        gap: 4px;
+    }
+    .stock-num {
+        font-size: 12px;
+        padding: 2px 7px;
+    }
+}
+
+
