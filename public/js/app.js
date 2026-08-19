@@ -24,26 +24,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 3000);
 });
 
-// Navigation Tabs (Syncs top nav bar & floating bottom nav bar)
+// Navigation Tabs
 function initNavigation() {
-    const navItems = document.querySelectorAll('.nav-tab, .bottom-nav-item');
-    navItems.forEach(tab => {
+    const tabs = document.querySelectorAll('.nav-tab');
+    tabs.forEach(tab => {
         tab.addEventListener('click', () => {
-            const target = tab.dataset.tab;
-            if (!target) return;
-
-            // Remove active state from all navigation items
-            document.querySelectorAll('.nav-tab, .bottom-nav-item').forEach(t => t.classList.remove('active'));
+            tabs.forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
             
-            // Activate matching tabs in both top nav & bottom nav
-            document.querySelectorAll(`.nav-tab[data-tab="${target}"], .bottom-nav-item[data-tab="${target}"]`).forEach(t => t.classList.add('active'));
-            
-            const targetPane = document.getElementById(`tab-${target}`);
-            if (targetPane) targetPane.classList.add('active');
-
-            // Scroll to top on navigation change
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            tab.classList.add('active');
+            const target = tab.dataset.tab;
+            document.getElementById(`tab-${target}`).classList.add('active');
 
             // Refresh data on tab click
             if (target === 'user-portal') loadUserPortal();
@@ -206,7 +197,7 @@ async function loadUserPortal() {
             activeUserPortalCategory = defaultCat;
         }
 
-        // 1. Render Category Selection Dropdown & Pills Slider
+        // 1. Render Category Selection Dropdown
         if (categorySelect) {
             let optionsHTML = '';
 
@@ -220,32 +211,6 @@ async function loadUserPortal() {
             optionsHTML += `<option value="ALL" ${isAllSelected}>🌟 ALL</option>`;
 
             categorySelect.innerHTML = optionsHTML;
-        }
-
-        // Render Category Horizontal Pill Slider
-        const pillsContainer = document.getElementById('portal-category-pills');
-        if (pillsContainer) {
-            let pillsHTML = '';
-            orderedCategories.forEach(mainCat => {
-                const icon = CATEGORY_TAB_ICONS[mainCat] || '📁';
-                const subMenus = mainMenus[mainCat] || [];
-                const catStock = subMenus.reduce((sum, s) => sum + (s.count || 0), 0);
-                const isActive = activeUserPortalCategory === mainCat ? 'active' : '';
-                pillsHTML += `
-                    <button type="button" class="cat-pill-tab ${isActive}" onclick="selectPortalCategory('${mainCat}')">
-                        <span>${icon} ${mainCat}</span>
-                        <span class="cat-pill-badge">${catStock}</span>
-                    </button>
-                `;
-            });
-
-            const isAllActive = activeUserPortalCategory === 'ALL' ? 'active' : '';
-            pillsHTML += `
-                <button type="button" class="cat-pill-tab ${isAllActive}" onclick="selectPortalCategory('ALL')">
-                    <span>🌟 ALL</span>
-                </button>
-            `;
-            pillsContainer.innerHTML = pillsHTML;
         }
 
         // 2. Render Sub-Menus Grid based on active category tab
@@ -265,7 +230,6 @@ async function loadUserPortal() {
             let subCardsHTML = '';
             subMenus.forEach(sub => {
                 const hasStock = sub.count > 0;
-                const emoji = getSubMenuEmoji(sub.name);
 
                 subCardsHTML += `
                     <div class="sub-menu-card-item">
@@ -274,8 +238,8 @@ async function loadUserPortal() {
                                 ${hasStock ? '' : 'disabled'} 
                                 onclick="claimAccount('${sub.name}')">
                             <span class="btn-content-row">
-                                <span class="btn-name"><span class="btn-icon-emoji">${emoji}</span>${sub.name}</span>
-                                <span class="stock-num">${hasStock ? `(${sub.count || 0})` : '(0)'}</span>
+                                <span class="btn-name">${sub.name}</span>
+                                <span class="stock-num">(${sub.count || 0})</span>
                             </span>
                         </button>
                     </div>
@@ -1849,13 +1813,7 @@ function updateAdminUI() {
 
     if (isAdminLoggedIn) {
         if (navTabsBar) navTabsBar.style.display = 'flex';
-        adminTabs.forEach(t => {
-            if (t.classList.contains('bottom-nav-item')) {
-                t.style.display = 'flex';
-            } else {
-                t.style.display = 'inline-flex';
-            }
-        });
+        adminTabs.forEach(t => t.style.display = 'inline-flex');
         if (authBtn) {
             authBtn.className = 'btn btn-danger btn-sm';
             authBtn.style.background = 'var(--danger)';
@@ -1874,12 +1832,13 @@ function updateAdminUI() {
             authBtn.innerHTML = '🔑';
         }
 
-        const activeTab = document.querySelector('.nav-tab.active, .bottom-nav-item.active');
+        const activeTab = document.querySelector('.nav-tab.active');
         if (activeTab && activeTab.classList.contains('admin-only-tab')) {
-            document.querySelectorAll('.nav-tab, .bottom-nav-item').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
 
-            document.querySelectorAll('.nav-tab[data-tab="user-portal"], .bottom-nav-item[data-tab="user-portal"]').forEach(t => t.classList.add('active'));
+            const portalTab = document.querySelector('.nav-tab[data-tab="user-portal"]');
+            if (portalTab) portalTab.classList.add('active');
             const portalPane = document.getElementById('tab-user-portal');
             if (portalPane) portalPane.classList.add('active');
             loadUserPortal();
