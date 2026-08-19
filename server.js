@@ -14,7 +14,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const CLOUDFLARE_API_URL = process.env.WEB_APP_URL || 'https://tgbot-web-app.pages.dev';
+const CLOUDFLARE_API_URL = process.env.WEB_APP_URL || 'https://tgbot-web-app-16r.pages.dev';
 
 // Proxy Web App API requests to Cloudflare D1 Database
 app.use('/api', async (req, res, next) => {
