@@ -280,7 +280,7 @@ async function handleTelegramUpdate(update, db, token, env) {
         }
 
         const adminKeyboard = [
-            [{ text: "🌐 ផ្ទាំងគ្រប់គ្រង Web App Dashboard", url: "https://tgbot-web-app.pages.dev" }],
+            [{ text: "🌐 ផ្ទាំងគ្រប់គ្រង Web App Dashboard", url: "https://tgbot-web-app-16r.pages.dev" }],
             [{ text: "➕ បញ្ចូលគណនីថ្មី (Add Accounts)", callback_data: "admin_add_help" }],
             [{ text: "⚙️ គ្រប់គ្រង Menu (Menus Summary)", callback_data: "admin_menus" }],
             [{ text: "👤 គ្រប់គ្រង Admin (Admins Config)", callback_data: "admin_admins" }],
@@ -370,7 +370,7 @@ async function handleTelegramUpdate(update, db, token, env) {
             text: `📜 <b>ប្រវត្តិទាញយកអាខោនសរុប (History Logs)៖</b>\n\n` +
                   `📊 សរុបទទួលបាន៖ <b>${histRow ? histRow.total : 0}</b> លើក\n\n` +
                   `🕒 <b>សកម្មភាពចុងក្រោយបំផុត ៥ លើក៖</b>\n${logsText}\n\n` +
-                  `🌐 មើលប្រវត្តិពេញលេញលើ Web App: https://tgbot-web-app.pages.dev`,
+                  `🌐 មើលប្រវត្តិពេញលេញលើ Web App: https://tgbot-web-app-16r.pages.dev`,
             parse_mode: 'HTML',
             reply_markup: { inline_keyboard: keyboard }
         });
@@ -379,11 +379,11 @@ async function handleTelegramUpdate(update, db, token, env) {
 
     if (callbackData === 'admin_add_help') {
         if (!isAdmin) return;
-        const keyboard = [[{ text: '🌐 ចូលទៅ Web App Dashboard', url: 'https://tgbot-web-app.pages.dev' }], [{ text: '⬅️ ត្រឡប់ក្រោយ (Back)', callback_data: 'admin_panel' }]];
+        const keyboard = [[{ text: '🌐 ចូលទៅ Web App Dashboard', url: 'https://tgbot-web-app-16r.pages.dev' }], [{ text: '⬅️ ត្រឡប់ក្រោយ (Back)', callback_data: 'admin_panel' }]];
         await sendTelegramApi(token, 'sendMessage', {
             chat_id: chatId,
             text: `➕ <b>របៀបបញ្ចូលគណនីថ្មី ឬ Excel៖</b>\n\n` +
-                  `១. សូមចូលទៅកាន់គេហទំព័រ Web App: https://tgbot-web-app.pages.dev\n` +
+                  `១. សូមចូលទៅកាន់គេហទំព័រ Web App: https://tgbot-web-app-16r.pages.dev\n` +
                   `២. ចូលទៅកាន់ផ្ទាំង <b>Accounts</b> ឬ <b>Excel Tools</b>\n` +
                   `៣. អ្នកអាច Drag & Drop ឯកសារ Excel (<code>.xlsx</code>) បញ្ចូលគណនីរាប់ពាន់ក្នុងពេលតែមួយបានយ៉ាងលឿន!`,
             parse_mode: 'HTML',
@@ -402,7 +402,7 @@ async function handleTelegramUpdate(update, db, token, env) {
                   `📁 Main Categories: <b>${Object.keys(MAIN_MENUS).length}</b>\n` +
                   `🎮 Sub Menus: <b>${Object.values(MAIN_MENUS).flat().length}</b>\n` +
                   `📦 អាខោនក្នុងស្តុកសរុប៖ <b>${accRow ? accRow.total : 0}</b> គណនី\n\n` +
-                  `🌐 គ្រប់គ្រង Menu និងឈ្មោះលើ Web App: https://tgbot-web-app.pages.dev`,
+                  `🌐 គ្រប់គ្រង Menu និងឈ្មោះលើ Web App: https://tgbot-web-app-16r.pages.dev`,
             parse_mode: 'HTML',
             reply_markup: { inline_keyboard: keyboard }
         });
