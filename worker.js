@@ -1,3 +1,5 @@
+import * as XLSX from 'xlsx';
+
 const DEFAULT_TOKEN = "";
 const MAIN_MENUS = {
     "SB": ["SB_CH", "SB_CH_KH", "SB", "SB_KH", "SB_V", "SB_V_KH", "SB_PK", "SB_PK_KH", "SB_TH", "SB_TH_KH"],
@@ -1019,12 +1021,85 @@ async function handleTelegramUpdate(update, db, token) {
             menu_button: { type: 'commands' }
         }).catch(() => {});
 
-        // Register bot command menu (/start)
-        sendTelegramApi(token, 'setMyCommands', {
-            commands: [
-                { command: 'start', description: 'សូមចាប់ផ្តើម និងបង្ហាញម៉ឺនុយ' }
+    // Register bot command menu (/start and /backup)
+    sendTelegramApi(token, 'setMyCommands', {
+        commands: [
+            { command: 'start', description: 'សូមចាប់ផ្តើម និងបង្ហាញម៉ឺនុយ' },
+            { command: 'backup', description: 'Backup Data (Accounts_Stock & History)' }
+        ]
+    }).catch(() => {});
+
+    // Backup Commands and Callbacks
+    if (messageText === '/backup' || messageText === '/Backup' || messageText === '/BACKUP' || callbackData === 'admin_backup') {
+        if (!isAdmin) return;
+
+        const keyboard = [
+            [
+                { text: "📦 Backup_Account", callback_data: "btn_backup_accounts" },
+                { text: "📜 Backup_History", callback_data: "btn_backup_history" }
             ]
-        }).catch(() => {});
+        ];
+
+        await sendTelegramApi(token, 'sendMessage', {
+            chat_id: chatId,
+            text: '📦 <b>សូមជ្រើសរើសប្រភេទ Backup Data ដែលអ្នកចង់ទាញយកជា Excel (.xlsx)៖</b>',
+            parse_mode: 'HTML',
+            reply_markup: { inline_keyboard: keyboard }
+        });
+        return;
+    }
+
+    if (messageText === '/backup_account' || messageText === '/backup_accounts' || messageText === '/Backup_Account' || messageText === '/Backup_Accounts' || callbackData === 'btn_backup_accounts') {
+        if (!isAdmin) return;
+
+        const accRows = db ? await db.prepare(`SELECT id, menu_name, username, password FROM accounts ORDER BY id ASC`).all() : { results: [] };
+        const accounts = accRows.results || [];
+
+        if (accounts.length === 0) {
+            await sendTelegramApi(token, 'sendMessage', {
+                chat_id: chatId,
+                text: '⚠️ គ្មានទិន្នន័យគណនីក្នុងស្តុកសម្រាប់ Backup ទេ។',
+                parse_mode: 'HTML'
+            });
+            return;
+        }
+
+        await sendTelegramExcelBuffer(
+            token,
+            chatId,
+            'backup_accounts.xlsx',
+            accounts,
+            'Accounts_Stock',
+            `📦 <b>ឯកសារ Backup Accounts ក្នុងស្តុក៖</b> (សរុប៖ <b>${accounts.length}</b> អាខោន)`
+        );
+        return;
+    }
+
+    if (messageText === '/backup_history' || messageText === '/Backup_History' || callbackData === 'btn_backup_history') {
+        if (!isAdmin) return;
+
+        const histRows = db ? await db.prepare(`SELECT id, user_id, tg_username, tg_name, menu_name, account_username, account_password, timestamp FROM history ORDER BY id DESC`).all() : { results: [] };
+        const history = histRows.results || [];
+
+        if (history.length === 0) {
+            await sendTelegramApi(token, 'sendMessage', {
+                chat_id: chatId,
+                text: '⚠️ គ្មានទិន្នន័យ History សម្រាប់ Backup ទេ។',
+                parse_mode: 'HTML'
+            });
+            return;
+        }
+
+        await sendTelegramExcelBuffer(
+            token,
+            chatId,
+            'backup_history.xlsx',
+            history,
+            'Download_History',
+            `📜 <b>ឯកសារ Backup History ទាំងអស់៖</b> (សរុប៖ <b>${history.length}</b> ប្រវត្តិ)`
+        );
+        return;
+    }
 
         await sendTelegramApi(token, 'sendMessage', {
             chat_id: chatId,
@@ -1152,6 +1227,28 @@ async function sendTelegramApi(token, method, payload) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
+    });
+    return await res.json();
+}
+
+async function sendTelegramExcelBuffer(token, chatId, filename, dataArray, sheetName, caption) {
+    const ws = XLSX.utils.json_to_sheet(dataArray);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+
+    const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const formData = new FormData();
+    formData.append('chat_id', chatId);
+    formData.append('document', blob, filename);
+    if (caption) {
+        formData.append('caption', caption);
+        formData.append('parse_mode', 'HTML');
+    }
+
+    const res = await fetch(`https://api.telegram.org/bot${token}/sendDocument`, {
+        method: 'POST',
+        body: formData
     });
     return await res.json();
 }
