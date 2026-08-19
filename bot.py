@@ -280,7 +280,7 @@ import urllib.request
 
 import time
 
-CLOUDFLARE_API_URL = os.environ.get("WEB_APP_URL", "https://tgbot-web-app.pages.dev").rstrip('/')
+CLOUDFLARE_API_URL = os.environ.get("WEB_APP_URL", "https://tgbot-web-app-16r.pages.dev").rstrip('/')
 MENU_CACHE = {"main_menus": {}, "counts": {}, "timestamp": 0}
 CACHE_TTL_SECONDS = 5  # Cache for 5s for instant 0.1s menu response times
 
@@ -699,7 +699,7 @@ async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_id not in ADMIN_IDS: return
 
     reply_markup = InlineKeyboardMarkup([
-        [InlineKeyboardButton("🌐 អាខោនតែស Web App", web_app={"url": "https://tgbot-web-app.pages.dev"})]
+        [InlineKeyboardButton("🌐 អាខោនតែស Web App", web_app={"url": "https://tgbot-web-app-16r.pages.dev"})]
     ])
     await update.message.reply_text(
         "🌐 <b>មុខងារគ្រប់គ្រង Admin ទាំងអស់ត្រូវបានផ្លាស់ប្តូរទៅកាន់ Web App ទាំងស្រុង៖</b>\n\n"
