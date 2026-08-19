@@ -1,6 +1,6 @@
 // Cloudflare Pages Function: GET /api/status
 
-const DEFAULT_TOKEN = "8896158929:AAEtHImX8E6oURbXH2I5K8c03As7DDdoZCk";
+const DEFAULT_TOKEN = "";
 const MAIN_MENUS = {
     "SB": ["SB_CH", "SB_CH_KH", "SB", "SB_KH", "SB_V", "SB_V_KH", "SB_PK", "SB_PK_KH", "SB_TH", "SB_TH_KH"],
     "Ball": ["Ball_CH", "Ball_V", "Ball_KL", "Ball_TH", "Ball_PK", "Ball"],
