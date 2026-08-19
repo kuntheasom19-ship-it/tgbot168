@@ -72,7 +72,7 @@ CONFIG_FILE = os.path.join(BASE_DIR, 'config.json')
 
 def load_config():
     default_config = {
-        "TOKEN": "8853663191:AAFZXa_aYKGzNyVVwSmuX6V_dHYw6jbSy3M",
+        "TOKEN": "8825169567:AAHthMKsZ9jHnfpYG92hVLe2l1vS79w9FyY",
         "ADMIN_IDS": [8558847170],
         "MENUS": ["F88$", "F88$_CH", "F88_CH_KH", "F88_KH"]
     }
