@@ -61,7 +61,7 @@ function getMainReplyKeyboard(mainMenus) {
         }
         keyboard.push(row);
     }
-    keyboard.push([{ text: "🌐 អាខោនតែស (Open Web App)", web_app: { url: "https://tgbot-web-app.pages.dev" } }]);
+    keyboard.push([{ text: "🌐 អាខោនតែស (Open Web App)", web_app: { url: "https://tgbot-web-app-16r.pages.dev" } }]);
     return { keyboard, resize_keyboard: true };
 }
 
@@ -92,7 +92,7 @@ async function getSubReplyKeyboard(db, catName) {
         keyboard.push(row);
     }
     keyboard.push([
-        { text: "🌐 អាខោនតែស (Open Web App)", web_app: { url: "https://tgbot-web-app.pages.dev" } },
+        { text: "🌐 អាខោនតែស (Open Web App)", web_app: { url: "https://tgbot-web-app-16r.pages.dev" } },
         { text: "⬅️ ត្រឡប់ក្រោយ (Back)" }
     ]);
     return { keyboard, resize_keyboard: true };
@@ -1032,7 +1032,7 @@ async function handleTelegramUpdate(update, db, token) {
             parse_mode: 'HTML',
             reply_markup: {
                 inline_keyboard: [
-                    [{ text: "🌐 អាខោនតែស (Open Web App)", web_app: { url: "https://tgbot-web-app.pages.dev" } }]
+                    [{ text: "🌐 អាខោនតែស (Open Web App)", web_app: { url: "https://tgbot-web-app-16r.pages.dev" } }]
                 ]
             }
         });
@@ -1053,7 +1053,7 @@ async function handleTelegramUpdate(update, db, token) {
             parse_mode: 'HTML',
             reply_markup: {
                 inline_keyboard: [
-                    [{ text: "🌐 អាខោនតែស (Open Web App)", web_app: { url: "https://tgbot-web-app.pages.dev" } }]
+                    [{ text: "🌐 អាខោនតែស (Open Web App)", web_app: { url: "https://tgbot-web-app-16r.pages.dev" } }]
                 ]
             }
         });
