@@ -783,6 +783,15 @@ async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.edit_message_text("ផ្ទាំងគ្រប់គ្រងត្រូវបានបិទ។")
         return
 
+    elif query.data == "btn_backup_accounts":
+        await query.answer()
+        await backup_accounts_action(query.message.chat_id, context)
+        return
+    elif query.data == "btn_backup_history":
+        await query.answer()
+        await backup_history_action(query.message.chat_id, context)
+        return
+
     elif query.data.startswith("admin_refresh_"):
         # Reload configuration dynamically
         reload_config()
@@ -812,6 +821,18 @@ async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             
         elif refresh_target == "backup":
+            reply_markup = InlineKeyboardMarkup([
+                [
+                    InlineKeyboardButton("📦 Backup_Account", callback_data="btn_backup_accounts"),
+                    InlineKeyboardButton("📜 Backup_History", callback_data="btn_backup_history")
+                ]
+            ])
+            await query.edit_message_text(
+                "📦 <b>សូមជ្រើសរើសប្រភេទ Backup Data ដែលអ្នកចង់ទាញយកជា Excel (.xlsx)៖</b>",
+                reply_markup=reply_markup,
+                parse_mode="HTML"
+            )
+            return
             db_path = os.path.join(BASE_DIR, 'bot_data.db')
             config_path = os.path.join(BASE_DIR, 'config.json')
             
@@ -2484,6 +2505,141 @@ async def del_main_menu_command(update: Update, context: ContextTypes.DEFAULT_TY
         await update.message.reply_text("❌ មានបញ្ហាក្នុងការរក្សាទុកទិន្នន័យ។")
 
 
+async def backup_accounts_action(chat_id, context):
+    db_path = os.path.join(BASE_DIR, 'bot_data.db')
+    accounts = []
+    try:
+        url = f"{CLOUDFLARE_API_URL}/api/accounts?page=1&limit=10000"
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=5) as response:
+            if response.status == 200:
+                data = json.loads(response.read().decode('utf-8'))
+                accounts = data.get('accounts', [])
+    except Exception as e:
+        logging.error(f"Error fetching accounts from Cloudflare for backup: {e}")
+
+    if not accounts and os.path.exists(db_path):
+        conn = sqlite3.connect(db_path)
+        cur = conn.cursor()
+        cur.execute("SELECT id, menu_name, username, password FROM accounts ORDER BY id ASC")
+        rows = cur.fetchall()
+        conn.close()
+        accounts = [{"id": r[0], "menu_name": r[1], "username": r[2], "password": r[3]} for r in rows]
+
+    if not accounts:
+        await context.bot.send_message(chat_id=chat_id, text="⚠️ គ្មានទិន្នន័យគណនីក្នុងស្តុកសម្រាប់ Backup ទេ។")
+        return
+
+    excel_filepath = os.path.join(BASE_DIR, "backup_accounts.xlsx")
+    data = {
+        "id": [a.get("id") for a in accounts],
+        "menu_name": [a.get("menu_name") for a in accounts],
+        "username": [a.get("username") for a in accounts],
+        "password": [a.get("password") for a in accounts]
+    }
+    df = pd.DataFrame(data)
+    with pd.ExcelWriter(excel_filepath, engine='openpyxl') as writer:
+        df.to_excel(writer, sheet_name="Accounts_Stock", index=False)
+
+    with open(excel_filepath, 'rb') as f:
+        await context.bot.send_document(
+            chat_id=chat_id,
+            document=f,
+            filename="backup_accounts.xlsx",
+            caption=f"📦 <b>ឯកសារ Backup Accounts ក្នុងស្តុក៖</b> (សរុប៖ <b>{len(accounts)}</b> អាខោន)",
+            parse_mode="HTML"
+        )
+    if os.path.exists(excel_filepath):
+        os.remove(excel_filepath)
+
+async def backup_history_action(chat_id, context):
+    db_path = os.path.join(BASE_DIR, 'bot_data.db')
+    history = []
+    try:
+        url = f"{CLOUDFLARE_API_URL}/api/history?limit=10000"
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=5) as response:
+            if response.status == 200:
+                data = json.loads(response.read().decode('utf-8'))
+                history = data.get('history', [])
+    except Exception as e:
+        logging.error(f"Error fetching history from Cloudflare for backup: {e}")
+
+    if not history and os.path.exists(db_path):
+        conn = sqlite3.connect(db_path)
+        cur = conn.cursor()
+        cur.execute("SELECT id, user_id, tg_username, tg_name, menu_name, account_username, account_password, timestamp FROM history ORDER BY id DESC")
+        rows = cur.fetchall()
+        conn.close()
+        history = [{
+            "id": r[0], "user_id": r[1], "tg_username": r[2], "tg_name": r[3],
+            "menu_name": r[4], "account_username": r[5], "account_password": r[6], "timestamp": r[7]
+        } for r in rows]
+
+    if not history:
+        await context.bot.send_message(chat_id=chat_id, text="⚠️ គ្មានទិន្នន័យ History សម្រាប់ Backup ទេ។")
+        return
+
+    excel_filepath = os.path.join(BASE_DIR, "backup_history.xlsx")
+    data = {
+        "id": [h.get("id") for h in history],
+        "user_id": [h.get("user_id") for h in history],
+        "tg_username": [h.get("tg_username") for h in history],
+        "tg_name": [h.get("tg_name") for h in history],
+        "menu_name": [h.get("menu_name") for h in history],
+        "account_username": [h.get("account_username") for h in history],
+        "account_password": [h.get("account_password") for h in history],
+        "timestamp": [h.get("timestamp") for h in history]
+    }
+    df = pd.DataFrame(data)
+    with pd.ExcelWriter(excel_filepath, engine='openpyxl') as writer:
+        df.to_excel(writer, sheet_name="Download_History", index=False)
+
+    with open(excel_filepath, 'rb') as f:
+        await context.bot.send_document(
+            chat_id=chat_id,
+            document=f,
+            filename="backup_history.xlsx",
+            caption=f"📜 <b>ឯកសារ Backup History ទាំងអស់៖</b> (សរុប៖ <b>{len(history)}</b> ប្រវត្តិ)",
+            parse_mode="HTML"
+        )
+    if os.path.exists(excel_filepath):
+        os.remove(excel_filepath)
+
+async def backup_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    if user_id not in ADMIN_IDS:
+        await update.message.reply_text("❌ អ្នកគ្មានសិទ្ធិប្រើប្រាស់មុខងារនេះទេ!")
+        return
+
+    reply_markup = InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("📦 Backup_Account", callback_data="btn_backup_accounts"),
+            InlineKeyboardButton("📜 Backup_History", callback_data="btn_backup_history")
+        ]
+    ])
+
+    await update.message.reply_text(
+        "📦 <b>សូមជ្រើសរើសប្រភេទ Backup Data ដែលអ្នកចង់ទាញយកជា Excel (.xlsx)៖</b>",
+        reply_markup=reply_markup,
+        parse_mode="HTML"
+    )
+
+async def backup_accounts_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    if user_id not in ADMIN_IDS:
+        await update.message.reply_text("❌ អ្នកគ្មានសិទ្ធិប្រើប្រាស់មុខងារនេះទេ!")
+        return
+    await backup_accounts_action(update.effective_chat.id, context)
+
+async def backup_history_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    if user_id not in ADMIN_IDS:
+        await update.message.reply_text("❌ អ្នកគ្មានសិទ្ធិប្រើប្រាស់មុខងារនេះទេ!")
+        return
+    await backup_history_action(update.effective_chat.id, context)
+
+
 # មគ្គុទ្ទេសក៍ណែនាំ តាម Command /help
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -2704,6 +2860,9 @@ def main():
     application.add_handler(CommandHandler("editmainmenu", edit_main_menu_command))
     application.add_handler(CommandHandler("movemenu", move_menu_command))
     application.add_handler(CommandHandler("sample", sample_command))
+    application.add_handler(CommandHandler(["backup", "Backup"], backup_command))
+    application.add_handler(CommandHandler(["backup_account", "backup_accounts", "Backup_Account", "Backup_Accounts"], backup_accounts_command))
+    application.add_handler(CommandHandler(["backup_history", "Backup_History"], backup_history_command))
     application.add_handler(CommandHandler("addadmin", add_admin_command))
     application.add_handler(CommandHandler("deladmin", del_admin_command))
     
