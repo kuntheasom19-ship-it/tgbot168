@@ -281,6 +281,8 @@ import urllib.request
 import time
 
 CLOUDFLARE_API_URL = os.environ.get("WEB_APP_URL", "https://tgbot-web-app-16r.pages.dev").rstrip('/')
+if "tgbot-web-app.pages.dev" in CLOUDFLARE_API_URL and "16r" not in CLOUDFLARE_API_URL:
+    CLOUDFLARE_API_URL = "https://tgbot-web-app-16r.pages.dev"
 MENU_CACHE = {"main_menus": {}, "counts": {}, "timestamp": 0}
 CACHE_TTL_SECONDS = 5  # Cache for 5s for instant 0.1s menu response times
 
